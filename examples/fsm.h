@@ -13,6 +13,9 @@ SC_MODULE(fsm){
    enum state_t {S0,S1,S2};
    sc_signal<state_t> state,next_state;
    
+   enum {AA,BB,CC,DD,EE} estado;
+   enum {a} est;
+   
 //translate off
    sc_signal<sc_uint<4> > temp;
 //translate on
@@ -23,12 +26,12 @@ SC_MODULE(fsm){
    SC_CTOR(fsm){
    
      SC_METHOD(regs);
-	 sensitive_pos(clk);
-	 sensitive_neg(rst);
+     sensitive_pos(clk);
+     sensitive_neg(rst);
 	 
-	 SC_METHOD(fsm_proc);
-	 sensitive(state);
-	 sensitive << input1;
+     SC_METHOD(fsm_proc);
+     sensitive(state);
+     sensitive << input1;
      sensitive(input2);
 	  
  }

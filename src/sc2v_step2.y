@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.2
+ *  SystemC to Verilog Translator v0.3
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -27,37 +27,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "list.h"
+#include "sc2v_step2.h"
 
-
-/*Global var to read from file_writes.sc2v*/
-  WritesList *writeslist;
-
-
-/*Global var to store ports*/
-  PortList *portlist;
-
-
-/* Global var to store signals*/
-  SignalsList *signalslist;
-
-
-/* Global var to store sensitivity list*/
-  SensibilityList *sensibilitylist;
-
-
-/* Global var to store instantiated modules*/
-  InstancesList *instanceslist;
-
-
-/* Global var to store process list*/
-  ProcessList *processlist;
-
-
-/*List of enumerates*/
-  EnumeratesList *enumerateslist;
-
-  EnumListList *enumlistlist;
 
   char *enumname;
 
@@ -66,42 +37,33 @@
 
 /*Multiple Declarations*/
   int multipledec;
-
   char *storedtype;
 
 
 /* Global var to store process module name*/
   char *module_name;
-
   int module_name_found = 0;
 
 
 /* Global var to store last port type*/
   char *lastportkind;
-
   int lastportsize;
-
   int activeport = 0;		// 1 -> reading port list
 
 /* Global var to store last signal type*/
   int lastsignalsize;
-
   int signalactive = 0;
 
 
 /* Global var to store last SC_METHOD found*/
   char *active_method;
-
   char *active_method_type;
-
   int method_found;
 
 
 /* Global var to store last sensitivity found*/
   char *last_sensibility;
-
   int sensibility_active = 0;
-
 
 
   int translate;
@@ -109,16 +71,12 @@
 
   void yyerror (const char *str)
   {
-
     fprintf (stderr, "error: %s\n", str);
-
   }
 
   int yywrap ()
   {
-
     return 1;
-
   }
 
 
@@ -126,90 +84,51 @@
   {
 
     /*Initialize lists */
-
-    writeslist = (WritesList *) malloc (sizeof (WritesList));
-
-    InitializeWritesList (writeslist);
-
-
-    portlist = (PortList *) malloc (sizeof (PortList));
-
-    InitializePortList (portlist);
-
-
-    signalslist = (SignalsList *) malloc (sizeof (SignalsList));
-
-    InitializeSignalsList (signalslist);
-
-
-    sensibilitylist = (SensibilityList *) malloc (sizeof (SensibilityList));
-
-    InitializeSensibilityList (sensibilitylist);
-
-
-    instanceslist = (InstancesList *) malloc (sizeof (InstancesList));
-
-    InitializeInstancesList (instanceslist);
-
-
-    processlist = (ProcessList *) malloc (sizeof (ProcessList));
-
-    InitializeProcessList (processlist);
-
-
-    enumlistlist = (EnumListList *) malloc (sizeof (EnumListList));
-
-    InitializeEnumListList (enumlistlist);
-
+    writeslist = NULL;
+    portlist = NULL;;
+    signalslist = NULL;
+    sensibilitylist=NULL;
+    processlist=NULL;
+    instanceslist = NULL;
+    enumlistlist = NULL;
 
     translate = 1;
 
-
+    fprintf(stderr,"\nSystemC to Verilog Translator v0.3\n\n");
+	fprintf(stderr,"Parsing header file.......\n\n");
+	
     yyparse ();
 
 
     printf ("module %s(", module_name);
-
     EnumeratePorts (portlist);
-
     printf (");\n");
 
 
     ShowPortList (portlist);
-
     printf ("\n");
-
     RegOutputs (portlist);
-
     printf ("\n");
 
 
     ShowEnumListList (enumlistlist);
 
+    writeslist=ReadWritesFile (writeslist,(char *) "file_writes.sc2v");
 
-    ReadWritesFile (writeslist, (char *) "file_writes.sc2v");
-
-
-    ShowSignalsList (signalslist, writeslist);
-
+    ShowSignalsList (signalslist);
     printf ("\n");
-
 
     ShowInstancedModules (instanceslist);
-
     printf ("\n");
-
 
     ShowDefines ((char *) "file_defines.sc2v");
 
-
     ShowProcessCode (processlist);
-
     printf ("\n");
-
 
     printf ("endmodule\n");
 
+	fprintf(stderr,"\nDone\n");
   }
 
 %}
@@ -221,8 +140,6 @@
 
 %% commands:	/* empty */
 |commands command;
-
-
 
 command:
 module
@@ -515,9 +432,9 @@ SC_METHOD OPENPAR WORD CLOSEPAR SEMICOLON
 
 	{
 
-	  InsertProcess (processlist, active_method, sensibilitylist,
+	  processlist=InsertProcess (processlist, active_method, sensibilitylist,
 			 active_method_type);
-
+      
 	}
 
       active_method = (char *) $3;
@@ -525,10 +442,8 @@ SC_METHOD OPENPAR WORD CLOSEPAR SEMICOLON
       method_found = 1;
 
       /* New sensitivity list */
-      sensibilitylist = (SensibilityList *) malloc (sizeof (SensibilityList));
-
-      InitializeSensibilityList (sensibilitylist);
-
+      sensibilitylist = NULL;
+      
     }
 
 };
@@ -543,7 +458,7 @@ SENSITIVE_NEG OPENPAR WORD CLOSEPAR SEMICOLON
     {
 
       active_method_type = (char *) "seq";	//comb
-      InsertSensibility (sensibilitylist, (char *) $3, "negedge");
+      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, "negedge");
 
     }
 
@@ -559,7 +474,7 @@ SENSITIVE_POS OPENPAR WORD CLOSEPAR SEMICOLON
     {
 
       active_method_type = (char *) "seq";	//comb
-      InsertSensibility (sensibilitylist, (char *) $3, "posedge");
+      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, "posedge");
 
     }
 
@@ -629,7 +544,7 @@ SENSITIVE OPENPAR WORD CLOSEPAR SEMICOLON
     {
 
       active_method_type = (char *) "comb";	//comb
-      InsertSensibility (sensibilitylist, (char *) $3, " ");
+      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, " ");
 
     }
 
@@ -645,7 +560,7 @@ SENSIBLE WORD
   if (translate == 1)
     {
 
-      InsertSensibility (sensibilitylist, (char *) $2,
+      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $2,
 			 (char *) last_sensibility);
 
     }
@@ -661,7 +576,7 @@ SENSIBLE WORD SEMICOLON
   if (translate == 1)
     {
 
-      InsertSensibility (sensibilitylist, (char *) $2,
+      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $2,
 			 (char *) last_sensibility);
 
       if (sensibility_active)
@@ -676,8 +591,6 @@ SENSIBLE WORD SEMICOLON
 
 };
 
-
-
 closekey:
 CLOSEKEY
 {
@@ -691,7 +604,7 @@ CLOSEKEY
 
 	  method_found = 0;
 
-	  InsertProcess (processlist, active_method, sensibilitylist,
+	  processlist=InsertProcess (processlist, active_method, sensibilitylist,
 			 active_method_type);
 
 	}
@@ -713,7 +626,7 @@ WORD SEMICOLON
 
 	{
 
-	  InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
+	  portlist=InsertPort (portlist,(char *) $1, lastportkind, lastportsize);
 
 	  activeport = 0;
 
@@ -723,7 +636,7 @@ WORD SEMICOLON
 
 	{
 
-	  InsertSignal (signalslist, (char *) $1, lastsignalsize);
+	  signalslist=InsertSignal (signalslist,(char *) $1, lastsignalsize);
 
 	  signalactive = 0;
 
@@ -747,9 +660,9 @@ WORD SEMICOLON
 	      length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	      InsertSignal (signalslist, (char *) $1, length);
+	      signalslist=InsertSignal (signalslist,(char *) $1, length);
 
-	      InsertWrite (writeslist, (char *) $1);
+	      writeslist=InsertWrite (writeslist,(char *) $1);
 
 	      free (storedtype);
 
@@ -784,7 +697,7 @@ WORD COLON
 
 	{
 
-	  InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
+	  portlist=InsertPort (portlist,(char *) $1, lastportkind, lastportsize);
 
 	}
 
@@ -792,7 +705,7 @@ WORD COLON
 
 	{
 
-	  InsertSignal (signalslist, (char *) $1, lastsignalsize);
+	  signalslist=InsertSignal (signalslist,(char *) $1, lastsignalsize);
 
 	}
 
@@ -800,7 +713,7 @@ WORD COLON
 
 	{
 
-	  InsertEnumerates (enumerateslist, (char *) $1);
+	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
 
 
 	}
@@ -823,9 +736,9 @@ WORD COLON
 	      length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	      InsertSignal (signalslist, (char *) $1, length);
+	      signalslist=InsertSignal (signalslist,(char *) $1, length);
 
-	      InsertWrite (writeslist, (char *) $1);
+	      writeslist=InsertWrite (writeslist,(char *) $1);
 
 	      multipledec = 1;
 
@@ -859,9 +772,9 @@ WORD CLOSEKEY WORD SEMICOLON
 
 	{
 
-	  InsertEnumerates (enumerateslist, (char *) $1);
+	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
 
-	  InsertEnumList (enumlistlist, enumerateslist, (char *) $4, 0);	//Insert also the variable name
+	  enumlistlist=InsertEnumList (enumlistlist, enumerateslist, (char *) $4, 0);	//Insert also the variable name
 	  reading_enumerates = 0;
 
 	}
@@ -884,9 +797,9 @@ WORD CLOSEKEY SEMICOLON
 
 	{
 
-	  InsertEnumerates (enumerateslist, (char *) $1);
+	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
 
-	  InsertEnumList (enumlistlist, enumerateslist, enumname, 1);	//Insert also the variable name
+	  enumlistlist=InsertEnumList (enumlistlist, enumerateslist, enumname, 1);	//Insert also the variable name
 	  reading_enumerates = 0;
 
 	}
@@ -905,7 +818,7 @@ WORD EQUALS NEW WORD OPENPAR QUOTE WORD QUOTE CLOSEPAR SEMICOLON
   if (translate == 1)
     {
 
-      InsertInstance (instanceslist, (char *) $1, (char *) $4);
+      instanceslist=InsertInstance (instanceslist, (char *) $1, (char *) $4);
 
     }
 
@@ -920,67 +833,23 @@ WORD ARROW WORD OPENPAR WORD CLOSEPAR SEMICOLON
   if (translate == 1)
     {
 
-      if (instanceslist->last == NULL)
-
-	{
-
-	  fprintf (stderr, "error: no instances found\n");
-
-	}
-
-      else
-
-	{
-
-	  InstanceNode *aux;
-
-	  aux = instanceslist->first;
-
-	  while (1)
-
-	    {
-
-	      if (strcmp (aux->nameinstance, (char *) $1) == 0)
-
-		{
-
-		  break;
-
-		}
-
-	      else
-
-		{
-
-		  if (aux->next == NULL)
-
-		    {
-
-		      fprintf (stderr, "error: instance %s not found\n", $1);
-
-		      exit (1);
-
-		    }
-
-		  else
-
-		    {
-
-		      aux = aux->next;
-
-		    }
-
-		}
-
+      if (instanceslist == NULL){
+  	     fprintf (stderr, "error: no instances found\n");
+  	  }else{
+      
+	    InstanceNode *ill;
+        SGLIB_LIST_MAP_ON_ELEMENTS (InstanceNode, instanceslist, ill, next,
+        {		
+		    if (strcmp (ill->nameinstance, (char *) $1) == 0){
+               ill->bindslist=InsertBind (ill->bindslist, (char *) $3, (char *) $5);
+			   break;
+			}
 	    }
-
-	  InsertBind (aux->bindslist, (char *) $3, (char *) $5);
-
-	}
+		);
     }
 
+   }
 };
-
 
 
 sc_ctor:
@@ -1023,9 +892,7 @@ ENUM OPENKEY
     {
 
       //New enumerate list
-      enumerateslist = (EnumeratesList *) malloc (sizeof (EnumeratesList));
-
-      InitializeEnumeratesList (enumerateslist);
+      enumerateslist = NULL;
 
       reading_enumerates = 1;
 
@@ -1043,11 +910,9 @@ ENUM WORD OPENKEY
     {
 
       //In this case we define type e.g. enum state_t {S0,S1,S2};
-      enumerateslist = (EnumeratesList *) malloc (sizeof (EnumeratesList));
+      enumerateslist = NULL;
 
-      InitializeEnumeratesList (enumerateslist);
-
-      enumname = malloc (sizeof (char) * strlen ((char *) $2));
+      enumname = (char *)malloc (sizeof (char) * strlen ((char *) $2));
 
       strcpy (enumname, (char *) $2);
 
@@ -1082,9 +947,9 @@ WORD WORD SEMICOLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	  InsertSignal (signalslist, (char *) $2, length);
+	  signalslist=InsertSignal (signalslist,(char *) $2, length);
 
-	  InsertWrite (writeslist, (char *) $2);
+	  writeslist=InsertWrite (writeslist,(char *) $2);
 
 	}
       else
@@ -1125,9 +990,9 @@ SC_SIGNAL MENOR WORD MAYOR WORD SEMICOLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	  InsertSignal (signalslist, (char *) $5, length);
+	  signalslist=InsertSignal (signalslist,(char *) $5, length);
 
-	  InsertWrite (writeslist, (char *) $5);
+	  writeslist=InsertWrite (writeslist,(char *) $5);	  
 
 	}
       else
@@ -1167,13 +1032,13 @@ WORD WORD COLON
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
-	  storedtype = malloc (sizeof (char) * strlen ((char *) $1));
+	  storedtype = (char *)malloc (sizeof (char) * strlen ((char *) $1));
 
 	  strcpy (storedtype, (char *) $1);
 
-	  InsertSignal (signalslist, (char *) $2, length);
+	  signalslist=InsertSignal (signalslist,(char *) $2, length);
 
-	  InsertWrite (writeslist, (char *) $2);
+	  writeslist=InsertWrite (writeslist,(char *) $2);
 
 	  multipledec = 1;
 
@@ -1199,29 +1064,26 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
 
   if (translate == 1)
     {
-
       int length, list_pos;
-
       length = 0;
-
       list_pos = 0;
 
       //Look in the enumerated list if it was declared e.j state_t state;
       list_pos = findEnumList (enumlistlist, (char *) $3);
 
       if (list_pos > -1)
-	{
+  	  {
 
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
-	  storedtype = malloc (sizeof (char) * strlen ((char *) $3));
+	  storedtype = (char *)malloc (sizeof (char) * strlen ((char *) $3));
 
 	  strcpy (storedtype, (char *) $3);
 
-	  InsertSignal (signalslist, (char *) $5, length);
+	  signalslist=InsertSignal (signalslist,(char *) $5, length);
 
-	  InsertWrite (writeslist, (char *) $5);
+	  writeslist=InsertWrite (writeslist,(char *) $5);
 
 	  multipledec = 1;
 

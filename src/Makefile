@@ -15,25 +15,26 @@
 #
 # Cygwin
 #
-#LEX = flex 
-#YACC = bison -y
+LEX = flex 
+YACC = bison -y
 #
 # Linux
 #
-LEX = lex 
-YACC = yacc 
+#LEX = lex 
+#YACC = yacc 
 
 all:
+	$(LEX) sc2v_step1.l
+	$(YACC) -d sc2v_step1.y
+	gcc lex.yy.c y.tab.c sc2v_step1.c -Isrc -o ../bin/sc2v_step1 -lm
 
 	$(LEX) sc2v_step2.l
 	$(YACC) -d sc2v_step2.y 
-	gcc lex.yy.c y.tab.c list.c -Isrc -o ../bin/sc2v_step2 -lm
-	$(LEX) sc2v_step1.l
-	$(YACC) -d sc2v_step1.y
-	gcc lex.yy.c y.tab.c list.c -Isrc -o ../bin/sc2v_step1 -lm
+	gcc lex.yy.c y.tab.c sc2v_step2.c -Isrc -o ../bin/sc2v_step2 -lm
+
 	$(LEX) sc2v_step3.l
 	$(YACC) -d sc2v_step3.y
-	gcc lex.yy.c y.tab.c list.c -Isrc -o ../bin/sc2v_step3 -lm
+	gcc lex.yy.c y.tab.c -Isrc -o ../bin/sc2v_step3 -lm
 
 clean:
 

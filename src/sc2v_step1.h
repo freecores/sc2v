@@ -21,22 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "sglib.h"
 
-%{
-#include <stdio.h>
-#include "y.tab.h"
+#define MAX_NAME_LENGTH 256
 
-extern int yylval;
+typedef struct _DefineNode
+{
+  char name[MAX_NAME_LENGTH];
+  struct _DefineNode *next;
+} DefineNode;
 
-%}
+typedef struct _RegNode
+{
+  char name[MAX_NAME_LENGTH];
+  char name2[MAX_NAME_LENGTH];
+  struct _RegNode *next;
+} RegNode;
 
-%%
-"module"[" "]*[a-zA-Z][_a-zA-Z0-9]*[" "]*["("] yylval=(int)strdup(yytext); return MODULE;
-"("[" "]*[a-zA-Z][_a-zA-Z0-9" "\[\]:]*[,]       yylval=(int)strdup(yytext); return WORD;
-"("                                        return OPENPAR;
-")"                                        return CLOSEPAR;
+/* Global var to store Regs */
+  RegNode *regslist;
+/* Global var to store Defines */
+  DefineNode *defineslist;
+
+/* Functions for defines list*/
+DefineNode *InsertDefine(DefineNode *list,char *name);
+int IsDefine(DefineNode *list,char *name);
+
+/* Functions for registers list*/
+RegNode *InsertReg(RegNode *list, char *name, char *name2);
+char *IsReg (RegNode *list,char *name);
 
 
-
-
-%%

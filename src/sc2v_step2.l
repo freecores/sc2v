@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.2
+ *  SystemC to Verilog Translator v0.3
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com

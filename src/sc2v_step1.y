@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.2
+ *  SystemC to Verilog Translator v0.3
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -26,13 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "list.h"
-
-/* Global var to store Regs */
-  RegsList *regslist;
-/* Global var to store Defines */
-  DefinesList *defineslist;
-
+#include "sc2v_step1.h"
 
   int processfound = 0;
   int switchfound = 0;
@@ -82,27 +76,27 @@
   main ()
   {
     int i;
+	
+	defineslist=NULL;
+	regslist=NULL;
 
-    regslist = (RegsList *) malloc (sizeof (RegsList));
-    InitializeRegsList (regslist);
-    defineslist = (DefinesList *) malloc (sizeof (DefinesList));
-    InitializeDefinesList (defineslist);
+	fprintf(stderr,"\nSystemC to Verilog Translator v0.3");
+	fprintf(stderr,"\nProvided by OpenSoc http://www.opensocdesign.com\n\n");
+	fprintf(stderr,"Parsing implementation file.......\n\n");
 
-    processname = (char *) malloc (256 * sizeof (int));
-    processname2 = (char *) malloc (256 * sizeof (int));
-    fileregs = (char *) malloc (256 * sizeof (int));
+    processname = (char *) malloc (256 * sizeof (char));
+    processname2 = (char *) malloc (256 * sizeof (char));
+    fileregs = (char *) malloc (256 * sizeof (char));
 
-    file_defines = (char *) malloc (256 * sizeof (int));
+    file_defines = (char *) malloc (256 * sizeof (char));
     strcpy (file_defines, (char *) "file_defines.sc2v");
     FILE_DEFINES = fopen (file_defines, (char *) "w");
-
-    file_writes = (char *) malloc (256 * sizeof (int));
+	  
+    file_writes = (char *) malloc (256 * sizeof (char));
     strcpy (file_writes, (char *) "file_writes.sc2v");
     FILE_WRITES = fopen (file_writes, (char *) "w");
-    if (FILE_WRITES != NULL)
-      printf ("\nopening file => filename = %s\n", file_writes);
 
-    lastword = malloc (sizeof (char) * 256);
+    lastword = (char *)malloc (sizeof (char) * 256);
 
     for (i = 0; i < 256; i++)
       switchparenthesis[i] = 0;
@@ -110,10 +104,12 @@
     translate = 1;
     verilog = 0;
     writemethod = 0;
-
+	
     yyparse ();
     fclose (FILE_WRITES);
     fclose (FILE_DEFINES);
+	
+	fprintf(stderr,"\nDone\n\n");
   }
 
 %}
@@ -279,18 +275,19 @@ READ OPENPAR CLOSEPAR
 defineword:
 DEFINE WORD WORD
 {
+  
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
 	{
 	  fprintf (file, "`define %s %s\n", (char *) $2, (char *) $3);
-	  InsertDefine (defineslist, (char *) $2);
+	  defineslist=InsertDefine(defineslist,(char *)$2);
 	}
       else
 	{
 	  fprintf (FILE_DEFINES, "`define %s %s\n", (char *) $2, (char *) $3);
-	  InsertDefine (defineslist, (char *) $2);
+	  defineslist=InsertDefine(defineslist,(char *)$2);
 	}
     }
   else if (verilog == 1)
@@ -301,18 +298,19 @@ DEFINE WORD WORD
 definenumber:
 DEFINE WORD NUMBER
 {
+    
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
 	{
 	  fprintf (file, "`define %s %d\n", (char *) $2, (int) $3);
-	  InsertDefine (defineslist, (char *) $2);
+	  defineslist=InsertDefine(defineslist,(char *)$2);
 	}
       else
 	{
 	  fprintf (FILE_DEFINES, "`define %s %d\n", (char *) $2, (int) $3);
-	  InsertDefine (defineslist, (char *) $2);
+      defineslist=InsertDefine(defineslist,(char *)$2);
 	}
     }
   else if (verilog == 1)
@@ -324,11 +322,14 @@ DEFINE WORD NUMBER
 definemacro:
 DEFINE WORD OPENPAR CLOSEPAR
 {
+  
+ 
   defineparenthesis = 0;
   //Macro found
   if (translate == 1 && verilog == 0)
     {
-      InsertDefine (defineslist, (char *) $2);
+	  defineslist=InsertDefine(defineslist,(char *)$2);
+      
       definefound = 1;
       if (processfound)
 	fprintf (file, "`define %s ", (char *) $2);
@@ -491,6 +492,7 @@ NUMBER
 word:
 WORD
 {
+  
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
@@ -512,17 +514,17 @@ WORD
 	  if (reg_found)
 	    {
 
-	      regname = malloc (sizeof (char) * (strlen ((char *) $1) + 1));
-	      regname2 =
-		malloc (sizeof (char) *
-			(strlen ((char *) $1) + strlen (processname)) + 1);
+	      regname = (char *)malloc (sizeof (char) * (strlen ((char *) $1) + 1));
+	      regname2 =(char *)malloc (sizeof (char) *(strlen ((char *) $1) + strlen (processname)) + 1);
 
 	      strcpy (regname, (char *) $1);
 	      strcpy (regname2, (char *) $1);
 	      strcat (regname2, processname);
 	      fprintf (regs_file, "%s", regname2);
-	      InsertReg (regslist, regname, regname2);
-	      free (regname);
+		  
+		  regslist=InsertReg(regslist,regname,regname2); 
+	
+  	      free (regname);
 	      free (regname2);
 	    }
 	  else
@@ -532,10 +534,11 @@ WORD
 		  for (i = 0; i < openedkeys; i++)
 		    fprintf (file, "   ");
 		}
-	      regname2 = IsReg (regslist, (char *) $1);
+	      regname2 = IsReg (regslist,(char *) $1);
 	      if (regname2 == NULL)
 		{
-		  if (IsDefine (defineslist, (char *) $1))
+		  
+		  if (IsDefine(defineslist,(char *)$1))
 		    {
 		      if (ifdeffound == 0)
 			{
@@ -562,7 +565,8 @@ WORD
 	}
       else if (definefound)
 	{
-	  if (IsDefine (defineslist, (char *) $1))
+	
+	 if (IsDefine(defineslist,(char *)$1))
 	    {
 
 	      fprintf (FILE_DEFINES, "`%s", (char *) $1);
@@ -811,14 +815,11 @@ OPENKEY
 	{
 	  if (openedkeys == 1)
 	    {
-	      printf ("opening file => filename = %s\n", processname2);
+	      printf ("Found process %s\n", processname);
 	      file = fopen (processname2, (char *) "w");
-	      printf ("opening file => filename = %s\n", fileregs);
 	      regs_file = fopen (fileregs, (char *) "w");
 	      processfound = 1;
-	      regslist = (RegsList *) malloc (sizeof (RegsList));
-	      InitializeRegsList (regslist);
-	    }
+   	    }
 	  if (processfound)
 	    if (openedkeys != switchparenthesis[switchfound])
 	      {
@@ -853,7 +854,7 @@ CLOSEKEY
 		  default_found = 0;
 		}
 	      for (i = 0; i < openedkeys - 1; i++)
-		fprintf (file, "   ");
+		  fprintf (file, "   ");
 	      fprintf (file, "endcase\n");
 	      newline = 1;
 	      switchparenthesis[switchfound] = 0;
@@ -864,7 +865,7 @@ CLOSEKEY
 	    {
 	      fprintf (file, "\n");
 	      for (i = 0; i < openedkeys; i++)
-		fprintf (file, "   ");
+		    fprintf (file, "   ");
 	      fprintf (file, "end\n");
 	      newline = 1;
 	    }
@@ -883,7 +884,6 @@ CLOSEKEY
 	{
 	  fclose (file);
 	  fclose (regs_file);
-	  free (regslist);
 	  processfound = 0;
 	}
     }

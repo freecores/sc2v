@@ -54,8 +54,7 @@ Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
 	
 	- You cannot use functions.
 	
-	-Macros with no parameters are supported, but may cause little problems
-	with name of variables. Macros with parameters are not supported.
+	-Macros not fully supported.
 	
 	-Only data types: bool, sc_int, sc_bigint, sc_uint and sc_biguint are
 	supported.
