@@ -1,3 +1,9 @@
+05-02-2005   Version 0.3.1
+
+             Contribution of Harald Devos:
+                Line number in syntax error
+                ShowSignalsList arguments corrected                  
+
 03-02-2005   Version 0.3
 
              Lists implementation completely rewrite using sglib library

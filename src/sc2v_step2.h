@@ -123,7 +123,7 @@ void EnumeratePorts (PortNode *list);
 
 /* Functions for signals list*/
 SignalNode *InsertSignal (SignalNode *list,char *name, int size);
-void ShowSignalsList (SignalNode *list);
+void ShowSignalsList (SignalNode* list, WriteNode* writeslist);
 int IsWire (char *name, InstanceNode * list);
 
 /* Functions for sensitivity list*/

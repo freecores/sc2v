@@ -28,6 +28,7 @@
 
 #include "sc2v_step1.h"
 
+  int lineno=1;
   int processfound = 0;
   int switchfound = 0;
   int switchparenthesis[256];
@@ -65,7 +66,7 @@
 
   void yyerror (const char *str)
   {
-    fprintf (stderr, "error: %s\n", str);
+    fprintf (stderr, "line: %d error: %s\n", lineno, str);
   }
 
   int yywrap ()
@@ -105,6 +106,8 @@
     verilog = 0;
     writemethod = 0;
 	
+    FILE* yyin = stdin;
+    FILE* yyout = stdout;
     yyparse ();
     fclose (FILE_WRITES);
     fclose (FILE_DEFINES);
@@ -1077,7 +1080,7 @@ TRANSLATEOFF
 {
   defineparenthesis = 0;
   translate = 0;
-  fprintf (stderr, "Found Translate off directive \n");
+  fprintf (stderr, "line: %d Found Translate off directive \n", lineno);
 };
 
 translateon:
@@ -1085,7 +1088,7 @@ TRANSLATEON
 {
   defineparenthesis = 0;
   translate = 1;
-  fprintf (stderr, "Found Translate on directive \n");
+  fprintf (stderr, "line: %d Found Translate on directive \n", lineno);
 };
 
 verilogbegin:
@@ -1093,7 +1096,7 @@ VERILOGBEGIN
 {
   defineparenthesis = 0;
   verilog = 1;
-  fprintf (stderr, "Found Verilog Begin directive \n");
+  fprintf (stderr, "line: %d Found Verilog Begin directive \n", lineno);
 };
 
 verilogend:
@@ -1101,7 +1104,7 @@ VERILOGEND
 {
   defineparenthesis = 0;
   verilog = 0;
-  fprintf (stderr, "Found Verilog End directive \n");
+  fprintf (stderr, "line: %d Found Verilog End directive \n", lineno);
 };
 
 ifdef:

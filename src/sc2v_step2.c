@@ -185,8 +185,8 @@ InsertSignal (SignalNode * list, char *name, int size)
 }
 
 
-void
-ShowSignalsList (SignalNode * list)
+void 
+ShowSignalsList (SignalNode * list, WriteNode * writeslist)
 {
   SignalNode *sll;
   SGLIB_LIST_MAP_ON_ELEMENTS (SignalNode, list, sll, next,

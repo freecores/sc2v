@@ -33,7 +33,7 @@
   char *enumname;
 
   int reading_enumerates = 0;
-
+  int lineno=1;
 
 /*Multiple Declarations*/
   int multipledec;
@@ -71,7 +71,7 @@
 
   void yyerror (const char *str)
   {
-    fprintf (stderr, "error: %s\n", str);
+    fprintf (stderr, "line: %d error: %s\n", lineno, str);
   }
 
   int yywrap ()
@@ -95,8 +95,11 @@
     translate = 1;
 
     fprintf(stderr,"\nSystemC to Verilog Translator v0.3\n\n");
-	fprintf(stderr,"Parsing header file.......\n\n");
+    fprintf(stderr,"Parsing header file.......\n\n");
 	
+    FILE* yyin = stdin;
+    FILE* yyout = stdout;
+
     yyparse ();
 
 
@@ -115,7 +118,8 @@
 
     writeslist=ReadWritesFile (writeslist,(char *) "file_writes.sc2v");
 
-    ShowSignalsList (signalslist);
+    ShowSignalsList (signalslist, writeslist);
+
     printf ("\n");
 
     ShowInstancedModules (instanceslist);
@@ -230,7 +234,7 @@ SC_MODULE OPENPAR WORD CLOSEPAR OPENKEY
 
 	{
 
-	  fprintf (stderr, "error: two or more modules found in the file\n");
+	  fprintf (stderr, "line: %d error: two or more modules found in the file\n",lineno);
 
 	  exit (1);
 
@@ -672,7 +676,7 @@ WORD SEMICOLON
 	  else
 	    {
 
-	      fprintf (stderr, "\nType %s unknow\n", (char *) $1);
+	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
 
 	      return (1);
 
@@ -746,7 +750,7 @@ WORD COLON
 	  else
 	    {
 
-	      fprintf (stderr, "\nType %s unknow\n", (char *) $1);
+	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
 
 	      return (1);
 
@@ -834,7 +838,7 @@ WORD ARROW WORD OPENPAR WORD CLOSEPAR SEMICOLON
     {
 
       if (instanceslist == NULL){
-  	     fprintf (stderr, "error: no instances found\n");
+  	     fprintf (stderr, "line: %d error: no instances found\n",lineno);
   	  }else{
       
 	    InstanceNode *ill;
@@ -955,7 +959,7 @@ WORD WORD SEMICOLON
       else
 	{
 
-	  fprintf (stderr, "\nType %s unknow\n", (char *) $1);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
 
 	  return (1);
 
@@ -998,7 +1002,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD SEMICOLON
       else
 	{
 
-	  fprintf (stderr, "\nType %s unknow\n", (char *) $3);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $3);
 
 	  return (1);
 
@@ -1046,7 +1050,7 @@ WORD WORD COLON
       else
 	{
 
-	  fprintf (stderr, "\nType %s unknow\n", (char *) $1);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
 
 	  return (1);
 
@@ -1091,7 +1095,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
       else
 	{
 
-	  fprintf (stderr, "\nType %s unknow\n", (char *) $3);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $3);
 
 	  return (1);
 
@@ -1109,7 +1113,7 @@ TRANSLATEOFF
 
   translate = 0;
 
-  fprintf (stderr, "Found Translate off directive \n");
+  fprintf (stderr, "line: %d Found Translate off directive \n",lineno);
 
 };
 
@@ -1121,6 +1125,6 @@ TRANSLATEON
 
   translate = 1;
 
-  fprintf (stderr, "Found Translate on directive \n");
+  fprintf (stderr, "line: %d Found Translate on directive \n",lineno);
 
 };

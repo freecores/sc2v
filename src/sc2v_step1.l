@@ -27,6 +27,10 @@
 #include "y.tab.h"
 
 extern int yylval;
+extern FILE* yyin;
+extern FILE* yyout;
+
+extern int lineno;
 
 int includefound = 0;
 int linecomment = 0;
@@ -68,8 +72,8 @@ bool                                if(!includefound & !linecomment & !multiline
 ";"                                 if(!includefound & !linecomment & !multilinecomment) return SEMICOLON; else {yylval=(int)strdup(yytext);} return WORD;
 [" "]+                              /*Ignore white spaces*/
 "\t"                                return TAB; /*Ignore Tab*/
-"\n"                                if (linecomment) linecomment=0; else if(includefound) includefound=0; return NEWLINE;
-"\\\n"                               /* no new line */ 
+"\n"                                lineno++; if (linecomment) linecomment=0; else if(includefound) includefound=0; return NEWLINE;
+"\\\n"                              lineno++; /* no new line */ 
 "0x"                                if(!includefound & !linecomment & !multilinecomment) return HEXA; else {yylval=(int)strdup(yytext);} return WORD;
 "$"                                 if(!includefound & !linecomment & !multilinecomment) return DOLLAR; else {yylval=(int)strdup(yytext);} return WORD;/* Ignore if(!includefound & !linecomment & !multilinecomment) $ */
 "(int)"                             if(!includefound & !linecomment & !multilinecomment) return INTCONV; else {yylval=(int)strdup(yytext);} return WORD;/* Ignore int type if(!includefound & !linecomment & !multilinecomment) conversions*/

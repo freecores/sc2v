@@ -26,6 +26,10 @@
 #include "y.tab.h"
 
 extern int yylval;
+extern FILE* yyin;
+extern FILE* yyout;
+
+extern int lineno;
 
 int includefound = 0;
 int linecomment = 0;
@@ -73,8 +77,8 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
                            return WORD;
                         }
 "*"                     if(!includefound & !linecomment & !multilinecomment) return ASTERISCO;
-"\n"                    includefound = 0; linecomment = 0;
-"\\\n"                  /* no new line */ 
+"\n"                    includefound = 0; linecomment = 0; lineno++;
+"\\\n"                  lineno++;/* no new line */ 
 "$"                     /* ignore */
 "."                     /* ignore */
 ":"                     /* ignore */
