@@ -95,9 +95,8 @@ main()
 	file_writes = (char *)malloc(256*sizeof(int));
 	strcpy(file_writes, (char *)"file_writes.sc2v");	
 	FILE_WRITES = fopen(file_writes,(char *)"w");
-
-        if(FILE_WRITES!=NULL)
-	  printf("\nopening file => filename = %s\n",file_writes);
+			if(FILE_WRITES!=NULL)
+				printf("\nopening file => filename = %s\n",file_writes);
   
         lastword=malloc(sizeof(char)*256);
 

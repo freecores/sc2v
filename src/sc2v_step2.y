@@ -548,7 +548,6 @@ word_closekey:
 		  {
 		    InsertEnumerates(enumerateslist, (char *)$1);
 			InsertEnumList(enumlistlist,enumerateslist,enumname,1); //Insert also the variable name
-			free(enumname);
 		    reading_enumerates=0;
 		  }
 		}

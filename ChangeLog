@@ -1,3 +1,9 @@
+23-01-2005   Version 0.2.4
+
+             Contribution of Harald Devos:
+                Corrected Memory allocation problems
+                Corrected return -1 in list.c                  
+
 20-01-2005   Version 0.2.3
 
              Corrected Memory allocation problems

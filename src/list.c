@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.1
+ *  SystemC to Verilog Translator v0.2
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -888,24 +888,25 @@ void ShowEnumListList(EnumListList *list)
 
 int findEnumList(EnumListList *list, char *name)
 {
-	int i=0;
-	if(list->last != NULL) 
-	{
-		EnumListNode *aux = list->first;
-		
-		while(1)
-		 {
-			//printf("%s %s %d %d\n",	aux->name,name,aux->istype,i);
-   		    if((strcmp(aux->name,name)==0) && ((aux->istype)==1)){
-			  return i;
-			}
-			if(aux->next==NULL){
-              return -1;	 	  
-			}
-			aux = aux->next;
-			i++;
-		 }
-   }	
+  int i=0;
+  if(list->last != NULL) 
+  {
+    EnumListNode *aux = list->first;
+
+    while(1)
+    {
+      //printf("%s %s %d %d\n",	aux->name,name,aux->istype,i);
+      if((strcmp(aux->name,name)==0) && ((aux->istype)==1)){
+	return i;
+      }
+      if(aux->next==NULL){
+	return -1;	 	  
+      }
+      aux = aux->next;
+      i++;
+    }
+  } else
+    return -1;
 }
 
 int findEnumerateLength(EnumListList *list, int offset){
