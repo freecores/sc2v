@@ -26,108 +26,106 @@
 #include <stdio.h>
 #include <string.h>
 
-int module_found = 0;
-int concat_found = 0;
-int opened_pars;
-int *concat_par_num;
-int concats_found = 0;
-char *aux;	
-void yyerror(const char *str)
-{
-	fprintf(stderr,"error: %s\n",str);
-}
+  int module_found = 0;
+  int concat_found = 0;
+  int opened_pars;
+  int *concat_par_num;
+  int concats_found = 0;
+  char *aux;
+  void yyerror (const char *str)
+  {
+    fprintf (stderr, "error: %s\n", str);
+  }
 
-int yywrap()
-{
-	return 1;
-}
+  int yywrap ()
+  {
+    return 1;
+  }
 
-main()
-{	
-	concat_par_num = (int *)malloc(16*sizeof(int));
-	*concat_par_num = 0;	
-	yyparse();
-	
-}
+  main ()
+  {
+    concat_par_num = (int *) malloc (16 * sizeof (int));
+    *concat_par_num = 0;
+    yyparse ();
+
+  }
 
 %}
 
 %token WORD 
 %token OPENPAR CLOSEPAR 
-%token MODULE
+%token MODULE 
 
-%%
-
-commands: /* empty */
-	| commands command
-	;
+%% commands:
+/* empty */
+|commands command;
 
 
 command:
-        module	
-	|
-	closepar
-	|
-	concat
-	|
-	openpar
-	;
+module 
+| 
+closepar 
+| 
+concat 
+| 
+openpar;
 
 module:
-   	MODULE
-	{
-		module_found = 1;
-		opened_pars++;
-		printf("%s",(char *)$1);
-	};
+MODULE
+{
+  module_found = 1;
+  opened_pars++;
+  printf ("%s", (char *) $1);
+};
+
 openpar:
-	OPENPAR
-	{
-		printf("(");
-		opened_pars++;
-	};
+OPENPAR
+{
+  printf ("(");
+  opened_pars++;
+};
 
 closepar:
-	CLOSEPAR
+CLOSEPAR
+{
+  if (module_found)
+    {
+      printf (")");
+      opened_pars--;
+      module_found = 0;
+    }
+  else if (concat_found)
+    {
+      if (opened_pars == *(concat_par_num + concats_found))
 	{
-		if(module_found)
-		{
-			printf(")");
-			opened_pars--;
-			module_found = 0;
-		}
-		else if(concat_found)
-		{	
-		     if(opened_pars == *(concat_par_num + concats_found))
-			{
-			printf("}");
-			concats_found--;
-			if(concats_found == 0)
-			 {
-			  concat_found = 0;
-			 }
-			}
-		     else
-		     	{
-			 printf(")");
-			}
-		     opened_pars--;
-		}
-		else
-		{
-			opened_pars--;
-			printf(")");
-		}
-	};	
+	  printf ("}");
+	  concats_found--;
+	  if (concats_found == 0)
+	    {
+	      concat_found = 0;
+	    }
+	}
+      else
+	{
+	  printf (")");
+	}
+      opened_pars--;
+    }
+  else
+    {
+      opened_pars--;
+      printf (")");
+    }
+};
 
 concat:
-	WORD
-	{
-		aux = (char *)$1;
-		aux++;
-		printf("{%s",aux);
-		concat_found = 1;
-		opened_pars++;
-		concats_found++;
-		*(concat_par_num + concats_found) = opened_pars;			
-	};
+WORD
+{
+  aux = (char *) $1;
+  aux++;
+  printf ("{%s", aux);
+  concat_found = 1;
+  opened_pars++;
+  concats_found++;
+  *(concat_par_num + concats_found) = opened_pars;
+};

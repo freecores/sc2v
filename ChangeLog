@@ -1,3 +1,11 @@
+26-01-2005   Version 0.2.5
+
+             Solved bug in nested switchs
+             Uses non-blocking assignments in sequential processes
+             Macros are correctly invoked inside and outside processes
+             More support for preprocessor constructions
+	 
+
 23-01-2005   Version 0.2.4
 
              Contribution of Harald Devos:
