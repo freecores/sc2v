@@ -1,0 +1,107 @@
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+  Authors:
+ 
+            Pablo Huerta (phuerta@opensocdesign.com)
+            Javier Castillo (jcastillo@opensocdesign.com)
+ 
+  Contributors:
+
+             David Moloney
+
+
+ 
+INSTRUCTIONS OF USE:
+
+1- Compiling the sources:
+
+The sc2v translator is based on lex and yacc tools. You need lex and yacc
+installed before trying to compile sc2v.
+
+For compiling the sources just type "make" under the directory you unzipped the
+fonts. It will generate two executables: sc2v_step1 and sc2v_step2.
+
+
+2- Translating an SystemC module:
+
+The translation is done in two steps. First you must translate the .cpp file by
+typing:	sc2v_step1 < file.cpp
+Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
+
+3- Format and restrictions of the SystemC files:
+	
+	- Each module must have a .h file with the declarations of ports,
+	signals, and processes, and there must exist a .cpp file with the code
+	of the processes.
+	
+	- For writing to a port or a signal you must ALWAYS use the .write()
+	method.
+	
+	- You cannot use functions.
+	
+	-Macros with no parameters are supported, but may cause little problems
+	with name of variables. Macros with parameters are not supported.
+	
+	-Only data types: bool, sc_int, sc_bigint, sc_uint and sc_biguint are
+	supported.
+	
+	-No enumerated types supported.
+	
+	-No global variables supported.
+	
+4- Known bugs
+
+	-Concatenation is not yet supported. If you use concatenations like:
+	(var1, var2), in the verilog file will appear identically, so you must
+	replace the "(" and ")" by "{" and "}" manually.
+	
+	-The usage of macros and defines may cause some errors.
+	
+	-Using comments in switch case structures may cause errors. Specially
+	when using structures like:
+	
+		case 1: //Comment here
+		case 2:
+		//Or comment here
+		case 3:	
+		
+	Better write it like this:
+	
+		//Comment for 1, 2 and 3
+		case 1:
+		case 2:
+		case 3:
+			instructions . . .
+			instructions . . .
+			instructions . . .
+
+	A general rule would be: "Don't use comments in the same line of case or
+	in the inmediate next line. Use comments in the line before the case
+	statement"
+
+5- For testing the application we recommend to use the systemcdes or the
+systemcmd5 cores, both available at www.opencores.org.
+
+6- For any doubt, comment, or for reporting bugs, feel free to write to
+sc2v@opensocdesign.com
+
+
+TODO:
+
+	- Repair all known bugs.
+	- Make functions supported.
+	- Make macros fully supported.
