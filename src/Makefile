@@ -37,5 +37,4 @@ all:
 	gcc lex.yy.c y.tab.c -Isrc -o ../bin/sc2v_step3 -lm
 
 clean:
-
 	rm -rf lex.* y.* *.o ../bin/sc2v_step2* ../bin/sc2v_step1* ../bin/sc2v_step3*
