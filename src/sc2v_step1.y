@@ -31,6 +31,7 @@
   int lineno = 1;
   int processfound = 0;
   int switchfound = 0;
+  int lastswitch=0;
   int switchparenthesis[256];
   int ifdeffound = 0;
   char *processname, *processname2;
@@ -520,15 +521,17 @@ WORD
     {
       if (processfound)
 	{
-	  if (openedcase)
+	  if(lastswitch){
+	    openedcase=0;
+	  }else if (openedcase)
 	    {
 	      fprintf (file, " :\n");
 
 	      for (i = 0; i < openedkeys; i++)
 		fprintf (file, "   ");
 
-	      fprintf (file, "begin\n");
-	      openedcase = 0;
+              fprintf(file,"begin\n");
+	      openedcase=0;
 	    }
 
 	  strcpy (lastword, (char *) $1);
@@ -614,6 +617,7 @@ WORD
     }
   else if (verilog == 1)
     fprintf (file, "%s ", (char *) $1);
+  lastswitch=0;
 };
 
 symbol:
@@ -985,11 +989,23 @@ switch:
 SWITCH
   {
     defineparenthesis = 0;
+    lastswitch=1;
     if (translate == 1 && verilog == 0)
       {
-	if (processfound)
+	if (processfound && !openedcase)
 	  {
 	    fprintf (file, "\n");
+	    for (i = 0; i < openedkeys; i++)
+	      fprintf (file, "   ");
+	    fprintf (file, "case");
+	    switchfound++;
+	    switchparenthesis[switchfound] = openedkeys + 1;
+	  }else if (processfound)
+	  {
+  	    fprintf (file, ":\n");
+            for (i = 0; i < openedkeys; i++)
+	      fprintf (file, "   ");
+	    fprintf(file,"begin\n");
 	    for (i = 0; i < openedkeys; i++)
 	      fprintf (file, "   ");
 	    fprintf (file, "case");
@@ -1009,6 +1025,7 @@ CASE NUMBER SYMBOL
     {
       if (processfound)
 	{
+	 if (!openedcase)
 	  for (i = 0; i < openedkeys; i++)
 	    fprintf (file, "   ");
 	  if (openedcase)
@@ -1033,6 +1050,7 @@ CASE HEXA NUMBER SYMBOL
     {
       if (processfound)
 	{
+	 if (!openedcase)
 	  for (i = 0; i < openedkeys; i++)
 	    fprintf (file, "   ");
 	  if (openedcase)
@@ -1057,6 +1075,7 @@ CASE WORD SYMBOL
     {
       if (processfound)
 	{
+	 if (!openedcase)
 	  for (i = 0; i < openedkeys; i++)
 	    fprintf (file, "   ");
 	  if (openedcase)
@@ -1081,6 +1100,7 @@ DEFAULT SYMBOL
     {
       if (processfound)
 	{
+	 if (!openedcase)
 	  for (i = 0; i < openedkeys; i++)
 	    fprintf (file, "   ");
 	  fprintf (file, "default:\n");

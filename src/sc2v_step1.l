@@ -66,7 +66,7 @@ bool                                if(!includefound & !linecomment & !multiline
 ".read"                             if(!includefound & !linecomment & !multilinecomment) return READ; else {yylval=(int)strdup(yytext);} return WORD;
 ".range"                            if(!includefound & !linecomment & !multilinecomment) return RANGE; else {yylval=(int)strdup(yytext);} return WORD;
 [a-zA-Z][_a-zA-Z0-9]*               yylval=(int)strdup(yytext); return WORD;
-[.:"^"!%()/+*_"&""?""|""\\"]        yylval=(int)strdup(yytext); return SYMBOL;
+[.:"^"!%()/+*_"&""?""|""\\"]         yylval=(int)strdup(yytext); return SYMBOL;
 "<="                                yylval=(int)strdup(yytext); return MINEQ;
 "="                                 yylval=(int)strdup(yytext); return EQUALS;
 "++"                                yylval=(int)strdup(yytext); return INC;

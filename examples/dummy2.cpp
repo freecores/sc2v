@@ -15,8 +15,8 @@ void
 fsm::fsm_proc ()
 {
 
-  sc_uint < 2 > c[4];
-  sc_uint < 4 > f;
+  sc_uint <2> c[4];
+  sc_uint <4> f;
   next_state.write (state.read ());
   array[0].write(1);
   
@@ -24,7 +24,7 @@ fsm::fsm_proc ()
   
   switch ((int) state.read ())
     {
-     case 0x1:			//Case 0
+     case 0x1:			
       if (input1.read ())
 	{
 	  next_state.write (1);
@@ -42,6 +42,26 @@ fsm::fsm_proc ()
 	}
       break;
      case 0x2:
+       //hola
+       switch(input1.read()){
+	case 0x1:
+	case 0x2:
+	  switch(input1.read()){
+	   case 0x1:
+	    b.write(0);
+	    break;
+	   case 0x3:
+	    b.write(1);
+	    break;
+	  }
+	  b.write(0);
+	  break;
+	case 0x3:
+	  b.write(1);
+	  break;
+	}
+                
+
       if (input2.read ())
 	{
 	  next_state.write (2);
