@@ -43,6 +43,7 @@ typedef struct _signal_node
 {
   char name[MAX_NAME_LENGTH];
   int size;
+  int arraysize;
   struct _signal_node *next;
 } SignalNode;
 
@@ -144,7 +145,7 @@ void ShowPortList (PortNode *list);
 void EnumeratePorts (PortNode *list);
 
 /* Functions for signals list*/
-SignalNode *InsertSignal (SignalNode *list,char *name, int size);
+SignalNode *InsertSignal (SignalNode *list,char *name, int size,int arraysize);
 void ShowSignalsList (SignalNode* list, WriteNode* writeslist);
 int IsWire (char *name, InstanceNode * list);
 

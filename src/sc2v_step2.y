@@ -144,7 +144,7 @@
 %token NUMBER SC_MODULE WORD OPENPAR CLOSEPAR SC_IN SC_OUT SEMICOLON BOOL ENUM 
 %token MENOR MAYOR SC_REG SC_METHOD SENSITIVE_POS SENSITIVE_NEG SENSITIVE 
 %token SENSIBLE CLOSEKEY OPENKEY SEMICOLON COLON SC_SIGNAL ARROW EQUALS NEW QUOTE 
-%token SC_CTOR VOID ASTERISCO TRANSLATEON TRANSLATEOFF 
+%token SC_CTOR VOID ASTERISCO TRANSLATEON TRANSLATEOFF OPENCORCH CLOSECORCH
 
 %% commands:	/* empty */
 |commands command;
@@ -224,7 +224,16 @@ module
   functioninputs
   |
   finishfunctioninputs
-  | boolfunction | boolfunctioninputs | boolfinishfunctioninputs;
+  | 
+  boolfunction 
+  | 
+  boolfunctioninputs 
+  | 
+  arraycolon
+  |
+  arraysemicolon
+  |
+  boolfinishfunctioninputs;
 
 module:
 SC_MODULE OPENPAR WORD CLOSEPAR OPENKEY
@@ -459,7 +468,25 @@ CLOSEKEY
     }
 };
 
+arraysemicolon:
+WORD OPENCORCH NUMBER CLOSECORCH SEMICOLON
+{
+if (signalactive)
+	{
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3);
+	  signalactive = 0;
+	}
+}
 
+arraycolon:
+WORD OPENCORCH NUMBER CLOSECORCH COLON
+{
+if (signalactive)
+	{
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3);
+	  signalactive = 0;
+	}
+}
 
 word_semicolon:
 WORD SEMICOLON
@@ -474,8 +501,7 @@ WORD SEMICOLON
 	}
       else if (signalactive)
 	{
-	  signalslist =
-	    InsertSignal (signalslist, (char *) $1, lastsignalsize);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,0);
 	  signalactive = 0;
 	}
       else if (multipledec)
@@ -490,7 +516,7 @@ WORD SEMICOLON
 	    {
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-	      signalslist = InsertSignal (signalslist, (char *) $1, length);
+	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0);
 	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      free (storedtype);
 	      multipledec = 0;
@@ -515,13 +541,11 @@ WORD COLON
     {
       if (activeport)
 	{
-	  portlist =
-	    InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
+	  portlist = InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
 	}
       else if (signalactive)
 	{
-	  signalslist =
-	    InsertSignal (signalslist, (char *) $1, lastsignalsize);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize, 0);
 	}
       else if (reading_enumerates)
 	{
@@ -541,7 +565,7 @@ WORD COLON
 	    {
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-	      signalslist = InsertSignal (signalslist, (char *) $1, length);
+	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0);
 	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      multipledec = 1;
 	    }
@@ -734,7 +758,7 @@ WORD WORD SEMICOLON
 	{
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
-	  signalslist = InsertSignal (signalslist, (char *) $2, length);
+	  signalslist = InsertSignal (signalslist, (char *) $2, length, 0);
 	  writeslist = InsertWrite (writeslist, (char *) $2);
 	}
       else
@@ -771,7 +795,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD SEMICOLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	  signalslist = InsertSignal (signalslist, (char *) $5, length);
+	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0);
 
 	  writeslist = InsertWrite (writeslist, (char *) $5);
 
@@ -818,7 +842,7 @@ WORD WORD COLON
 
 	  strcpy (storedtype, (char *) $1);
 
-	  signalslist = InsertSignal (signalslist, (char *) $2, length);
+	  signalslist = InsertSignal (signalslist, (char *) $2, length,0);
 
 	  writeslist = InsertWrite (writeslist, (char *) $2);
 
@@ -856,7 +880,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 	  storedtype = (char *) malloc (sizeof (char) * strlen ((char *) $3));
 	  strcpy (storedtype, (char *) $3);
-	  signalslist = InsertSignal (signalslist, (char *) $5, length);
+	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0);
 	  writeslist = InsertWrite (writeslist, (char *) $5);
 	  multipledec = 1;
 	}

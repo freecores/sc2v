@@ -172,13 +172,14 @@ EnumeratePorts (PortNode * list)
 }
 
 SignalNode *
-InsertSignal (SignalNode * list, char *name, int size)
+InsertSignal (SignalNode * list, char *name, int size, int arraysize)
 {
   SignalNode *sl;
 
   sl = (SignalNode *) malloc (sizeof (SignalNode));
   strcpy (sl->name, name);
   sl->size = size;
+  sl->arraysize=arraysize;
   SGLIB_LIST_ADD (SignalNode, list, sl, next);
   return (list);
 
@@ -198,7 +199,7 @@ ShowSignalsList (SignalNode * list, WriteNode * writeslist)
 	  {
 	    printf ("[%d:0] ", (-1 + sll->size));
 	  }
-	  printf ("%s;\n", sll->name);
+	  printf ("%s", sll->name);
 	}
 	else
 	{
@@ -207,8 +208,11 @@ ShowSignalsList (SignalNode * list, WriteNode * writeslist)
 	  {
 		printf ("[%d:0] ", (-1 + sll->size));
 	  }
-	  printf ("%s;\n", sll->name);
+	  printf ("%s", sll->name);
 	}
+        if(sll->arraysize !=0)
+	  printf("[%d:0]", (-1 + sll->size));
+	printf(";\n");
   }
   );
   return;

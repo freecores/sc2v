@@ -76,6 +76,15 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
                            yylval=(int)strdup(yytext); 
                            return WORD;
                         }
+"["                     if(!includefound & !linecomment & !multilinecomment) {
+                           yylval=(int)strdup(yytext); 
+                           return OPENCORCH;
+                        }
+"]"                     if(!includefound & !linecomment & !multilinecomment) {
+                           yylval=(int)strdup(yytext); 
+                           return CLOSECORCH;
+                        }
+			
 "*"                     if(!includefound & !linecomment & !multilinecomment) return ASTERISCO;
 "\n"                    includefound = 0; linecomment = 0; lineno++;
 "\\\n"                  lineno++;/* no new line */ 

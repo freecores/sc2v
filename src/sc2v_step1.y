@@ -39,6 +39,7 @@
   int openedkeys = 0;
   int newline = 0;
   int reg_found = 0;
+  int array_size=0;
   int integer_found=0;
   int regs_end;
   int i = 0;			//for loops counter
@@ -509,6 +510,7 @@ WORD DEC
   else if (verilog == 1)
     fprintf (file, "%s-- ", (char *) $1);
 };
+
 word:
 WORD
 {

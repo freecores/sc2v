@@ -3,6 +3,7 @@
              Corrected bug with <= comparation
              for loops with int type as index supported
              Support hex numbers in switchs 
+	     Support sc_signals arrays
 
 25-02-2005   Version 0.4
 
