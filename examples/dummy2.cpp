@@ -24,10 +24,10 @@ fsm::fsm_proc ()
   
   switch ((int) state.read ())
     {
-     case 0x1:			
+     case 0x1a:			
       if (input1.read ())
 	{
-	  next_state.write (1);
+	  next_state.write (sc_uint<4>(0x1b1));
 	  a.write (true);
 	}
       else if (input2.read () < input1.read())
@@ -41,7 +41,7 @@ fsm::fsm_proc ()
 	  a.write (1);
 	}
       break;
-     case 0x2:
+     case 0xfaf67:
        //hola
        switch(input1.read()){
 	case 0x1:
@@ -68,7 +68,7 @@ fsm::fsm_proc ()
 	  b.write (1);
 	}
       break;
-     case 3:
+     case 35:
       next_state.write (0);
       break;
     }

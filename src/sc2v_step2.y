@@ -199,7 +199,8 @@ module
   sc_ctor
   |
   void
-  |inst_decl
+  |
+  inst_decl
   |
   closekey_semicolon
   |

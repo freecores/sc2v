@@ -213,7 +213,7 @@ ShowSignalsList (SignalNode * list, WriteNode * writeslist)
 	  printf ("%s", sll->name);
 	}
         if(sll->arraysize !=0)
-	  printf("[%d:0]", (-1 + sll->size));
+	  printf("[%d:0]", (-1 + sll->arraysize));
 	printf(";\n");
   }
   );

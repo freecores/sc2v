@@ -192,6 +192,10 @@ endfunc
   |
   case_hexnumber
   |
+  case_hexword
+  |
+  case_hexnumberword
+  |
   case_word
   |
   case_default
@@ -779,6 +783,8 @@ OPENPAR
     {
       fprintf (file, "(");
     }
+  //If par after a sc_reg declaration the declaration is a type cast  
+  reg_found=0;
 }
 
 closepar:
@@ -1045,6 +1051,7 @@ CASE NUMBER SYMBOL
 case_hexnumber:
 CASE HEXA NUMBER SYMBOL
 {
+  //Is a dec number
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
@@ -1065,6 +1072,58 @@ CASE HEXA NUMBER SYMBOL
     }
   else if (verilog == 1)
     fprintf (file, "case %d %s", $3, (char *) $4);
+};
+
+case_hexword:
+CASE HEXA WORD SYMBOL
+{
+  //Begin with a-F
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	 if (!openedcase)
+	  for (i = 0; i < openedkeys; i++)
+	    fprintf (file, "   ");
+	  if (openedcase)
+	    fprintf (file, ", 'h%s", (char *)$3);
+	  else
+	    fprintf (file, "'h%s", (char *)$3);
+
+	  newline = 1;
+	  openedcase = 1;
+
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "case 0x%s %s", (char *)$3, (char *) $4);
+};
+
+case_hexnumberword:
+CASE HEXA NUMBER WORD SYMBOL
+{
+  //Hex number beginning with dec number
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	 if (!openedcase)
+	  for (i = 0; i < openedkeys; i++)
+	    fprintf (file, "   ");
+	  if (openedcase)
+	    fprintf (file, ", 'h%d%s", $3,(char *)$4);
+	  else
+	    fprintf (file, "'h%d%s", $3,(char *)$4);
+
+	  newline = 1;
+	  openedcase = 1;
+
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "case %d%s %s", $3, (char *) $4, (char *)$5);
 };
 
 case_word:

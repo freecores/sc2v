@@ -28,6 +28,7 @@ SC_MODULE(fsm){
      SC_METHOD(fsm_proc);
      sensitive(state);
      sensitive << input1;
+     sensitive << array[3];
      sensitive(input2);
 	  
  }
