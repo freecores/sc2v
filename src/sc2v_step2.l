@@ -74,13 +74,14 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
                         }
 "*"                     if(!includefound & !linecomment & !multilinecomment) return ASTERISCO;
 "\n"                    includefound = 0; linecomment = 0;
+"\\\n"                  /* no new line */ 
 "$"                     /* ignore */
 "."                     /* ignore */
 ":"                     /* ignore */
 "#include"              includefound = 1;
-"//"                    linecomment = 1;
-"/*"                    multilinecomment = 1;
-"*/"                    multilinecomment = 0;
+"//"                    if (!multilinecomment) linecomment = 1; 
+"/*"                    if (!linecomment) multilinecomment = 1;
+"*/"                    if (multilinecomment) multilinecomment = 0;
 "/"                     /* ignore */
 "-"
 "#"                   

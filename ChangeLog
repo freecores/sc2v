@@ -1,6 +1,13 @@
+18-01-2005   Version 0.2.2
+
+             Contribution of Harald Devos:
+                Corrected bug when using keywords in comments
+                Adding multilines with \
+                  
+
 17-01-2005   Version 0.2.1
           
-             Corrected bug in else if
+	     Corrected bug in else if
              Translate true and false into 1 and 0
 
 

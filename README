@@ -22,6 +22,7 @@
   Contributors:
 
              David Moloney
+	     Harald Devos
 
 
  
@@ -64,29 +65,7 @@ Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
 4- Known bugs
 
 	-The usage of macros and defines may cause some errors.
-	
-	-Using comments in switch case structures may cause errors. Specially
-	when using structures like:
-	
-		case 1: //Comment here
-		case 2:
-		//Or comment here
-		case 3:	
 		
-	Better write it like this:
-	
-		//Comment for 1, 2 and 3
-		case 1:
-		case 2:
-		case 3:
-			instructions . . .
-			instructions . . .
-			instructions . . .
-
-	A general rule would be: "Don't use comments in the same line of case or
-	in the inmediate next line. Use comments in the line before the case
-	statement"
-
 5- For testing the application we recommend to use the systemcdes or the
 systemcmd5 cores, both available at www.opencores.org.
 
