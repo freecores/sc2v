@@ -39,6 +39,7 @@
   int openedkeys = 0;
   int newline = 0;
   int reg_found = 0;
+  int integer_found=0;
   int regs_end;
   int i = 0;			//for loops counter
   FILE *file;
@@ -120,8 +121,8 @@
 
 %token NUMBER WORD SC_REG BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE WORD SYMBOL NEWLINE ENUM INCLUDE 
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
-%token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR INTCONV 
-%token VOID TTRUE TFALSE ENDFUNC 
+%token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR MINEQ
+%token VOID TTRUE TFALSE ENDFUNC INC DEC INTEGER EQUALS
 %token PIFDEF PENDDEF PELSE 
 
 %% commands:	/* empty */
@@ -137,13 +138,13 @@ endfunc
   |
   dollar
   |
-  intconv
-  |
   tab
   |
   read
   |
   sc_reg
+  |
+  integer
   |
   number
   |
@@ -169,27 +170,81 @@ endfunc
   |
   openpar
   |
-  closepar | void |opencorch | closecorch | bigger | lower | switch |case_only
-  |case_number
-    |
-    case_word
-    |
-    case_default
-    |
-    break
-    |hexa
-    |
-    definemacro
-    |
-    defineword
-    |
-    definenumber
-    |
-    translateoff
-    |
-    translateon
-    | verilogbegin | verilogend | ifdef | endif | pelse | ttrue | tfalse;
+  closepar 
+  | 
+  void
+  |
+  opencorch 
+  | 
+  closecorch 
+  |
+  bigger 
+  | 
+  lower 
+  | 
+  switch 
+  |
+  case_only
+  |
+  case_number
+  |
+  case_hexnumber
+  |
+  case_word
+  |
+  case_default
+  |
+  break
+  |
+  hexa
+  |
+  definemacro
+  |
+  defineword
+  |
+  definenumber
+  |
+  translateoff
+  |
+  translateon
+  | 
+  verilogbegin 
+  | 
+  verilogend 
+  | 
+  ifdef 
+  | 
+  endif 
+  | 
+  pelse 
+  | 
+  ttrue 
+  | 
+  tfalse
+  |
+  increment
+  |
+  decrement
+  |
+  equal
+  |
+  minorequal;
 
+minorequal:
+MINEQ
+{
+ //This rule is needed because <= in the step two could be confused with a non-blocking assignment
+ defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  fprintf (file, "<1+");
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "<=");
+};
 
 endfunc:
 ENDFUNC
@@ -235,13 +290,6 @@ DOLLAR
     fprintf (file, " $");
 };
 
-intconv:
-INTCONV
-{
-  defineparenthesis = 0;
-  if (verilog == 1)
-    fprintf (file, " (int)");
-};
 
 tab:
 TAB
@@ -326,7 +374,8 @@ DEFINE WORD OPENPAR CLOSEPAR
     fprintf (file, "#define %s ()", (char *) $2);
 }
 
-void:WORD TWODOUBLEPOINTS WORD OPENPAR
+void:
+WORD TWODOUBLEPOINTS WORD OPENPAR
 {
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
@@ -355,6 +404,21 @@ SC_REG LOWER NUMBER BIGGER
 	}
     }
 };
+
+integer:
+INTEGER
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  fprintf (regs_file, "integer ");
+	  integer_found = 1;
+	}
+    }
+};
+
 
 bool:
 BOOL
@@ -412,9 +476,39 @@ NUMBER
     }
   else if (verilog == 1)
     fprintf (file, "%d", $1);
-}
+};
 
-;
+increment:
+WORD INC
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+       if (processfound){
+        regname2 = IsReg (regslist, (char *) $1);
+        if (regname2 == NULL){
+            fprintf (file, "%s=%s+1", (char *) $1,(char *)$1);
+        }else
+	    fprintf (file, "%s=%s+1", regname2,regname2);
+       }
+  else if (verilog == 1)
+    fprintf (file, "%s++ ", (char *) $1);
+};
+
+decrement:
+WORD DEC
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+      if (processfound){
+        regname2 = IsReg (regslist, (char *) $1);
+        if (regname2 == NULL){
+            fprintf (file, "%s=%s+1", (char *) $1,(char *)$1);
+        }else
+	    fprintf (file, "%s=%s+1", regname2,regname2);
+      }
+  else if (verilog == 1)
+    fprintf (file, "%s-- ", (char *) $1);
+};
 word:
 WORD
 {
@@ -439,14 +533,8 @@ WORD
 
 	  if (reg_found)
 	    {
-
-	      regname =
-		(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
-	      regname2 =
-		(char *) malloc (sizeof (char) *
-				 (strlen ((char *) $1) +
-				  strlen (processname)) + 1);
-
+	      regname =	(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
+	      regname2 = (char *) malloc (sizeof (char) * (strlen ((char *) $1) + strlen (processname)) + 1);
 	      strcpy (regname, (char *) $1);
 	      strcpy (regname2, (char *) $1);
 	      strcat (regname2, processname);
@@ -457,7 +545,23 @@ WORD
 	      free (regname);
 	      free (regname2);
 	    }
-	  else
+	  else if(integer_found){
+	      regname =	(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
+	      regname2 = (char *) malloc (sizeof (char) * (strlen ((char *) $1) + strlen (processname)) + 1);
+	      strcpy (regname, (char *) $1);
+	      strcpy (regname2, (char *) $1);
+	      strcat (regname2, processname);
+	      fprintf (regs_file, "%s;\n", regname2);
+
+	      regslist = InsertReg (regslist, regname, regname2);
+
+	      //After adding to list print it
+	      fprintf (file, "%s ", regname2);
+              integer_found=0;
+	      free (regname);
+	      free (regname2);
+     
+	  }else
 	    {
 	      if (newline)
 		{
@@ -508,7 +612,7 @@ WORD
 	}
     }
   else if (verilog == 1)
-    fprintf (file, " %s", (char *) $1);
+    fprintf (file, "%s ", (char *) $1);
 };
 
 symbol:
@@ -533,6 +637,22 @@ SYMBOL
     fprintf (file, "%s", (char *) $1);
 };
 
+equal:
+EQUALS
+{
+  defineparenthesis = 0;
+  reg_found=0;
+  if (translate == 1 && verilog == 0)
+  {
+      if (processfound)
+	fprintf (file, "=");
+  }
+  else if (definefound)
+    fprintf (FILE_DEFINES, "=");
+  else if (verilog == 1)
+    fprintf (file, "=");
+    
+}
 
 write:
 WRITE
@@ -902,6 +1022,30 @@ CASE NUMBER SYMBOL
     }
   else if (verilog == 1)
     fprintf (file, "case %d %s", $2, (char *) $3);
+};
+
+case_hexnumber:
+CASE HEXA NUMBER SYMBOL
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  for (i = 0; i < openedkeys; i++)
+	    fprintf (file, "   ");
+	  if (openedcase)
+	    fprintf (file, ", 'h%d", $3);
+	  else
+	    fprintf (file, "'h%d", $3);
+
+	  newline = 1;
+	  openedcase = 1;
+
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "case %d %s", $3, (char *) $4);
 };
 
 case_word:

@@ -1,6 +1,12 @@
-25-02-2004   Version 0.4
+15-03-2005   Version 0.4.1
 
-             Added support for functions
+             Corrected bug with <= comparation
+             for loops with int type as index supported
+             Support hex numbers in switchs 
+
+25-02-2005   Version 0.4
+
+             Added support for unsigned functions
 
 05-02-2005   Version 0.3.1
 

@@ -29,10 +29,13 @@ fsm::fsm_proc ()
 verilog end*/
 
   sc_uint < 2 > c;
+  sc_uint < 4 > f;
   next_state.write (state.read ());
   a.write (func1(a.read(),b.read()));
   b.write (HOLA);
 
+  f.write((0,input2.read()));
+  
 #ifdef CONCAT
   c.write ((a.range (1, 0), b.range (1, 0)));
 #else
@@ -41,13 +44,13 @@ verilog end*/
 
   switch ((int) state.read ())
     {
-    case S0:			//Case 0
+    case 0x1:			//Case 0
       if (input1.read ())
 	{
 	  next_state.write (S1);
 	  a.write (true);
 	}
-      else if (input2.read ())
+      else if (input2.read () < input1.read())
 	{
 	  next_state.write (S2);
 	  a.write (false);
@@ -68,6 +71,9 @@ verilog end*/
       break;
 //   tRaNsLaTe   oN               
     case S2:
+          for(int i=0;i<=10;i++){
+	      c.write(i);
+	  }
       next_state.write (S0);
       break;
     }

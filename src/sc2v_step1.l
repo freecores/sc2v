@@ -43,6 +43,7 @@ int multilinecomment = 0;
 "false"                             if(!includefound & !linecomment & !multilinecomment) return TFALSE; else {yylval=(int)strdup(yytext);} return WORD;
 [0-9]+                              yylval=atoi(yytext); return NUMBER;
 "::"                                if(!includefound & !linecomment & !multilinecomment) return TWODOUBLEPOINTS; else {yylval=(int)strdup(yytext);} return WORD;
+"int"                               if(!includefound & !linecomment & !multilinecomment) return INTEGER; else {yylval=(int)strdup(yytext);} return WORD;
 sc_int                              if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
 sc_uint                             if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
 sc_bigint                           if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
@@ -65,7 +66,11 @@ bool                                if(!includefound & !linecomment & !multiline
 ".read"                             if(!includefound & !linecomment & !multilinecomment) return READ; else {yylval=(int)strdup(yytext);} return WORD;
 ".range"                            if(!includefound & !linecomment & !multilinecomment) return RANGE; else {yylval=(int)strdup(yytext);} return WORD;
 [a-zA-Z][_a-zA-Z0-9]*               yylval=(int)strdup(yytext); return WORD;
-[.:"^"!%()=/+*_"&""?""|""\\"]       yylval=(int)strdup(yytext); return SYMBOL;
+[.:"^"!%()/+*_"&""?""|""\\"]        yylval=(int)strdup(yytext); return SYMBOL;
+"<="                                yylval=(int)strdup(yytext); return MINEQ;
+"="                                 yylval=(int)strdup(yytext); return EQUALS;
+"++"                                yylval=(int)strdup(yytext); return INC;
+"--"                                yylval=(int)strdup(yytext); return DEC;
 "-"                                 yylval=(int)strdup(yytext); return SYMBOL;
 "~"                                 yylval=(int)strdup(yytext); return SYMBOL;
 "@"                                 yylval=(int)strdup(yytext); return SYMBOL;
@@ -77,8 +82,6 @@ bool                                if(!includefound & !linecomment & !multiline
 "\\\n"                              lineno++; /* no new line */ 
 "0x"                                if(!includefound & !linecomment & !multilinecomment) return HEXA; else {yylval=(int)strdup(yytext);} return WORD;
 "$"                                 if(!includefound & !linecomment & !multilinecomment) return DOLLAR; else {yylval=(int)strdup(yytext);} return WORD;/* Ignore if(!includefound & !linecomment & !multilinecomment) $ */
-"(int)"                             if(!includefound & !linecomment & !multilinecomment) return INTCONV; else {yylval=(int)strdup(yytext);} return WORD;/* Ignore int type if(!includefound & !linecomment & !multilinecomment) conversions*/
-
 "#define"                           if(!includefound & !linecomment & !multilinecomment) return DEFINE; else {yylval=(int)strdup(yytext);} return WORD;
 "#include"                          includefound = 1;
 "#ifdef"                            if(!includefound & !linecomment & !multilinecomment) return PIFDEF; else {yylval=(int)strdup(yytext);} return WORD;
@@ -92,6 +95,8 @@ bool                                if(!includefound & !linecomment & !multiline
 "("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
 "("[ ]*"sc_int"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
 "("[ ]*"sc_bigint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+"("[ ]*"int"[ ]*")"
+
 
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][fF][fF]  return TRANSLATEOFF;  /*Translate directive*/
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][nN]      return TRANSLATEON;   /*Translate directive*/

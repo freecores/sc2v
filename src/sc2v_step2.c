@@ -226,7 +226,7 @@ IsWire (char *name, InstanceNode * list)
     BindNode * bll;
 	SGLIB_LIST_MAP_ON_ELEMENTS (BindNode,ill->bindslist, bll, next,
 	{
-	if ((strcmp(name,bll->namebind) ==0))
+	if ((strcmp(name,bll->namebind)==0))
 	{
 	 return 1;
 	}
@@ -353,6 +353,7 @@ ShowProcessCode (ProcessNode * list)
 			      auxchar = lookahead;
 			  }else{
 			      printf ("%c", auxchar);
+			      auxchar = lookahead;
 			  }
 		   }
 	     }
