@@ -18,7 +18,7 @@ all:
 
 test: 
 	cd src; make all
-	cd examples; ../bin/sc2v.sh rng; ../bin/sc2v.sh md5; echo ""; echo "sc2v translated the following files successfully"; echo ""; ls -l *.v 
+	cd examples; ../bin/sc2v.sh rng; ../bin/sc2v.sh md5; ../bin/sc2v.sh fsm; echo ""; echo "sc2v translated the following files successfully"; echo ""; ls -l *.v 
 
 docs:
 	cd src; doxygen doxygen.cfg 

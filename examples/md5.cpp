@@ -11,7 +11,7 @@
 ////   - done                                                     ////
 ////                                                              ////
 ////  Author(s):                                                  ////
-////      - Javier Castillo, jcastilo@opencores.org               ////
+////      - Javier Castillo, jcastillo@opencores.org              ////
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 ////                                                              ////
@@ -43,6 +43,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2004/10/08 14:04:10  jcastillo
+// First import
+//
 // Revision 1.1.1.1  2004/09/08 16:24:49  jcastillo
 // Initial release
 //

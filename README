@@ -33,7 +33,7 @@ The sc2v translator is based on lex and yacc tools. You need lex and yacc
 installed before trying to compile sc2v.
 
 For compiling the sources just type "make" under the directory you unzipped the
-fonts. It will generate two executables: sc2v_step1 and sc2v_step2.
+fonts. It will generate three executables: sc2v_step1 and sc2v_step2 sc2v_step3.
 
 
 2- Translating an SystemC module:
@@ -59,16 +59,10 @@ Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
 	-Only data types: bool, sc_int, sc_bigint, sc_uint and sc_biguint are
 	supported.
 	
-	-No enumerated types supported.
-	
 	-No global variables supported.
 	
 4- Known bugs
 
-	-Concatenation is not yet supported. If you use concatenations like:
-	(var1, var2), in the verilog file will appear identically, so you must
-	replace the "(" and ")" by "{" and "}" manually.
-	
 	-The usage of macros and defines may cause some errors.
 	
 	-Using comments in switch case structures may cause errors. Specially

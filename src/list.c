@@ -23,6 +23,7 @@
  
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "list.h"
 
@@ -317,9 +318,9 @@ void ShowPortList(PortList *list)
 		while(1)
 		{
 			printf("%s ",aux->tipo);
-			if(aux->size != 0)
+			if(aux->size != 0 && aux->size !=1)
 			{
-				printf("[%d:0] ",(-1 + aux->size));
+			  printf("[%d:0] ",(-1 + aux->size));
 			}
 			printf("%s;\n",aux->name);
 			if(aux->next==NULL)
@@ -341,9 +342,9 @@ void RegOutputs(PortList *list)
 			if(strcmp(aux->tipo, (char *)"output")==0)
 			{
 				printf("reg ");
-				if(aux->size != 0)
+				if(aux->size != 0 && aux->size!=1)
 				{
-					printf("[%d:0] ",(-1 + aux->size));
+				  printf("[%d:0] ",(-1 + aux->size));
 				}
 				printf("%s;\n",aux->name);
 			}
@@ -416,18 +417,18 @@ void ShowSignalsList(SignalsList *list, WritesList *WritesList)
 			if(IsWrite(WritesList, aux->name))
 			{
 				printf("reg ");
-				if(aux->size != 0)
+				if(aux->size != 0 && aux->size!=1)
 				{
-					printf("[%d:0] ",(-1 + aux->size));
+				   printf("[%d:0] ",(-1 + aux->size));
 				}
 			printf("%s;\n",aux->name);
 			}
 			else
 			{
 				printf("wire ");
-				if(aux->size != 0)
+				if(aux->size != 0 && aux->size!=1)
 				{
-					printf("[%d:0] ",(-1 + aux->size));
+				  printf("[%d:0] ",(-1 + aux->size));
 				}
 			printf("%s;\n",aux->name);
 			}
@@ -519,15 +520,16 @@ void ShowSensibilityList(SensibilityList *list)
 		SensibilityNode *aux = list->first;
 		while(1)
 		{
-			printf("%s ",aux->tipo);
+		    if(!strcmp(aux->tipo,"posedge") || !strcmp(aux->tipo, "negedge"))
+			  printf(" %s",aux->tipo);
 			if(aux->next==NULL)
 	 	 	{
-	 			printf("%s",aux->name);
+	 			printf(" %s",aux->name);
 		 		break;
 		 	}
 			else
 			{
-				printf("%s or ",aux->name);
+				printf(" %s or",aux->name);
 			}
 		aux = aux->next;
 		}
@@ -594,6 +596,7 @@ void ShowProcessCode(ProcessList *list)
 		int readok;
 		char *filename;
 		char auxchar;
+		char begin[10];
 		
 		while(1)
 		{
@@ -616,11 +619,22 @@ void ShowProcessCode(ProcessList *list)
 									
 			printf("always @(");
 			ShowSensibilityList(aux->list);
-			printf(")\n");
+			printf(" )\n");
+			printf("   begin\n");
 			strcpy(filename,aux->name);
 			strcat(filename,(char *)".sc2v");
 			archivo = fopen(filename,(char *)"r");
-						
+	        
+			/*Read the initial begin of the file*/
+			fscanf(archivo,"%s",begin);
+			readok=fread((void *)&auxchar, sizeof(char), 1, archivo);
+			
+			/*Trim the beggining of the file*/
+			while(auxchar=='\n' || auxchar==' ' || auxchar=='\t')
+				readok=fread((void *)&auxchar, sizeof(char), 1, archivo);
+			
+			printf("\n   %c",auxchar);
+  			
 			while(1)
 				{
 				readok = fread((void *)&auxchar, sizeof(char), 1, archivo);
@@ -741,4 +755,190 @@ void ShowInstancedModules(InstancesList *list)
 					}
 				}
 			}
+}
+
+//Enumerates list
+void InitializeEnumeratesList(EnumeratesList *list)
+{
+	EnumeratesNode *first;
+	first = (EnumeratesNode *)malloc(sizeof(EnumeratesNode));
+	list->first = first;
+	list->last = NULL;
+}
+
+void InsertEnumerates(EnumeratesList *list, char *name)
+{
+	if(list->last == NULL)  
+	{
+		list->first->name = name;
+		list->first->next = NULL;
+		list->last = list->first;
+	}
+	else
+	{
+		EnumeratesNode *nuevo;
+		nuevo = (EnumeratesNode *)malloc(sizeof(EnumeratesNode));
+		nuevo->name = name;
+		nuevo->next = NULL;
+		list->last->next = nuevo;
+		list->last = nuevo;
+	}
+}
+
+int ShowEnumeratesList(EnumeratesList *list)
+{
+	int i=0;
+	if(list->last != NULL) 
+	{
+		EnumeratesNode *aux = list->first;
+		printf("parameter  %s = 0",aux->name);
+		
+		if(aux->next!=NULL){
+		 printf(",\n");
+		 aux = aux->next;
+		 i=1;
+		 while(1)
+		 {
+			if(aux->next==NULL)
+	 	 	{
+	 			printf("           %s = %d;\n\n",aux->name,i);
+		 		return(i);
+		 	}
+			else
+			{
+				printf("           %s = %d,\n",aux->name,i);
+			}
+		 i++;
+		 aux = aux->next;
+		 }
+	   }else{
+		 printf(";\n\n");
+		 return(i);
+	   }
+	}
+}
+
+//List of enumerates list
+void InitializeEnumListList(EnumListList *list)
+{
+	EnumListNode *first;
+	first = (EnumListNode *)malloc(sizeof(EnumListNode));
+	list->first = first;
+	list->last = NULL;
+}
+
+void InsertEnumList(EnumListList *list, EnumeratesList *enumlist, char *name, int istype)
+{
+	if(list->last == NULL)  
+	{
+		list->first->name = name;
+		list->first->istype = istype;
+		list->first->list = enumlist;
+		list->first->next = NULL;
+		list->last = list->first;
+	}
+	else
+	{
+		EnumListNode *nuevo;
+		nuevo = (EnumListNode *)malloc(sizeof(EnumListNode));
+		nuevo->name = name;
+		nuevo->istype = istype;
+		nuevo->list = enumlist;
+		nuevo->next = NULL;
+		list->last->next = nuevo;
+		list->last = nuevo;
+	}
+}
+
+void ShowEnumListList(EnumListList *list)
+{
+	int items;
+	
+	if(list->last != NULL) 
+	{
+		EnumListNode *aux = list->first;
+		while(1)
+		{
+			items=ShowEnumeratesList(aux->list);
+
+            //Calculate the number of bits needed to represent the enumerate
+			double bits,bits_round;
+			int bits_i;
+			bits=log((double)(items+1))/log(2.0);
+			bits_i=bits;
+			bits_round=bits_i;
+			if(bits_round!=bits) bits_i++;
+			if(bits_i==0) bits_i=1;
+			
+			if(!(aux->istype)){
+              if((bits_i-1)!=0)
+			   printf("reg [%d:0] %s;\n\n",bits_i-1,aux->name);
+			  else
+			   printf("reg %s;\n\n",aux->name);
+		    }
+			
+			if(aux->next==NULL)
+			{
+				break;
+			}
+			aux = aux->next;
+		}
+	}
+}
+
+int findEnumList(EnumListList *list, char *name)
+{
+	int i=0;
+	if(list->last != NULL) 
+	{
+		EnumListNode *aux = list->first;
+		
+		while(1)
+		 {
+			//printf("%s %s %d %d\n",	aux->name,name,aux->istype,i);
+   		    if((strcmp(aux->name,name)==0) && ((aux->istype)==1)){
+			  return i;
+			}
+			if(aux->next==NULL){
+              return -1;	 	  
+			}
+			aux = aux->next;
+			i++;
+		 }
+   }	
+}
+
+int findEnumerateLength(EnumListList *list, int offset){
+    int i=0;
+	double bits,bits_round;
+	int bits_i;
+	
+	if(list->last != NULL) 
+	{
+		i=0;
+		EnumListNode *aux = list->first;
+		EnumeratesNode *aux2;
+		
+	    for(i=0;i< offset; i++)
+		  aux = aux->next;
+		
+		aux2=aux->list->first;
+		
+		i=0;
+		while(1)
+		 {
+			i++;
+			if(aux2->next==NULL){
+			  //Calculate the number of bits needed to represent the enumerate
+			  bits=log((double)(i))/log(2.0);
+			  bits_i=bits;
+			  bits_round=bits_i;
+			  if(bits_round!=bits) bits_i++;
+			  if(bits_i==0) bits_i=1;
+              return bits_i;	 	  
+			}
+			aux2 = aux2->next;
+			
+		 }
+   }	
 }

@@ -43,6 +43,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2004/10/08 14:04:10  jcastillo
+// First import
+//
 // Revision 1.1.1.1  2004/09/08 16:24:49  jcastillo
 // Initial release
 //
@@ -91,13 +94,13 @@ SC_MODULE (md5)
   void round64FSM ();
   void md5_rom ();
   void funcs ();
-
+  
   SC_CTOR (md5)
   {
 
     SC_METHOD (reg_signal);
-    sensitive_pos << clk;
-    sensitive_neg << reset;
+    sensitive_pos (clk);
+    sensitive_neg (reset);
 
     SC_METHOD (md5_getdata);
     sensitive << newtext_i << data_i << load_i << getdata_state <<

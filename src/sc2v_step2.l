@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.1
+ *  SystemC to Verilog Translator v0.2
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -60,6 +60,7 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 \(                      if(!includefound & !linecomment & !multilinecomment) return OPENPAR;
 \)                      if(!includefound & !linecomment & !multilinecomment) return CLOSEPAR;
 ;                       if(!includefound & !linecomment & !multilinecomment) return SEMICOLON;
+"enum"                  if(!includefound & !linecomment & !multilinecomment) return ENUM;
 ","                     if(!includefound & !linecomment & !multilinecomment) return COLON;
 "{"                     if(!includefound & !linecomment & !multilinecomment) return OPENKEY;
 "}"                     if(!includefound & !linecomment & !multilinecomment) return CLOSEKEY;
@@ -82,9 +83,11 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 "*/"                    multilinecomment = 0;
 "/"                     /* ignore */
 "-"
-"#"
+"#"                   
 "@"
 "|"
 "~"
 
+"//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][fF][fF]  return TRANSLATEOFF;  /*Translate directive*/
+"//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][nN]      return TRANSLATEON;  /*Translate directive*/
 %%

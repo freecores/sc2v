@@ -122,6 +122,28 @@ typedef struct _process_list {
 	ProcessNode *last;
 } ProcessList;
 
+typedef struct _enumerates_node {
+	char *name;
+	struct _enumerates_node *next;
+} EnumeratesNode;
+
+typedef struct _enumerates_list {
+	EnumeratesNode *first;
+	EnumeratesNode *last;
+} EnumeratesList;
+
+typedef struct _enumlist_node {
+	char *name;
+	int istype;
+	EnumeratesList *list;
+	struct _enumlist_node *next;
+} EnumListNode;
+
+typedef struct _enumlist_list {
+	EnumListNode *first;
+	EnumListNode *last;
+} EnumListList;
+
 /* Functions for DEFINES list*/
 void InitializeDefinesList(DefinesList *list);
 void InsertDefine(DefinesList *list, char *name);
@@ -169,3 +191,15 @@ void InsertInstance(InstancesList *list, char *nameInstance, char *namemodulo);
 void InitializeBindsList(BindsList *list);
 void InsertBind(BindsList *list, char *namePort, char *namebind);
 void ShowInstancedModules(InstancesList *list);
+
+/* Functions for enumerates list*/
+void InitializeEnumeratesList(EnumeratesList *list);
+void InsertEnumerates(EnumeratesList *list, char *name);
+int ShowEnumeratesList(EnumeratesList *list);
+
+/*Functions of list of enumerates list*/
+void InitializeEnumListList(EnumListList *list);
+void InsertEnumList(EnumListList *list, EnumeratesList *enumlist, char *name, int istype);
+void ShowEnumListList(EnumListList *list);
+int findEnumList(EnumListList *list, char *name);
+int findEnumerateLength(EnumListList *list, int offset);

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.1
+ *  SystemC to Verilog Translator v0.2
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -31,16 +31,16 @@ extern int yylval;
 %}
 
 %%
+"void"                              return VOID;
 [0-9]+                              yylval=atoi(yytext); return NUMBER;
-void                                /* Ignore void */
-"::"                                return DOSPUNTOSDOBLE;
+"::"                                return TWODOUBLEPOINTS;
 sc_int                              return SC_INT;
 sc_uint                             return SC_UINT;
 sc_bigint                           return SC_BIGINT;
 sc_biguint                          return SC_BIGUINT;
 bool                                return BOOL;
-">"                                 return MAYOR;
-"<"                                 return MENOR;
+">"                                 return BIGGER;
+"<"                                 return LOWER;
 "{"                                 return OPENKEY;
 "}"                                 return CLOSEKEY;
 "("                                 return OPENPAR;
@@ -54,20 +54,30 @@ bool                                return BOOL;
 "break"                             return BREAK;
 ".read"                             return READ;
 ".range"                            return RANGE;
-"#define"                           return DEFINE;
-"#include"                          /* Ignore #include */
 [a-zA-Z][_a-zA-Z0-9]*               yylval=(int)strdup(yytext); return WORD;
 [.:"^"!%()=/+*_"&""?""|""\\"]       yylval=(int)strdup(yytext); return SYMBOL;
 "-"                                 yylval=(int)strdup(yytext); return SYMBOL;
 "~"                                 yylval=(int)strdup(yytext); return SYMBOL;
 "@"                                 yylval=(int)strdup(yytext); return SYMBOL;
-"#"                                 yylval=(int)strdup(yytext); return SYMBOL;
 ","                                 return COLON;
 ";"                                 return SEMICOLON;
-[" "]+                              /* Ignore white spaces*/
-"\t"                                /* Ignore TAB; */
+[" "]+                              /*Ignore white spaces*/
+"\t"                                return TAB; /*Ignore Tab*/
 "\n"                                return NEWLINE;
 "0x"                                return HEXA;
-"$"                                 /* Ignore $ */
-"(int)"                             /* Ignore int type conversions*/
+"$"                                 return DOLLAR; /* Ignore $ */
+"(int)"                             return INTCONV; /* Ignore int type conversions*/
+
+"#define"                           return DEFINE;
+"#include"                          
+"#ifdef"                            return PIFDEF;
+"#else"                             return PELSE;
+"#endif"                            return PENDDEF;
+
+
+"//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][fF][fF]  return TRANSLATEOFF;  /*Translate directive*/
+"//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][nN]      return TRANSLATEON;   /*Translate directive*/
+"/*"[ ]*[vV][eE][rR][iI][lL][oO][gG][ ]*[bB][eE][gG][iI][nN]  return VERILOGBEGIN;
+[vV][eE][rR][iI][lL][oO][gG][ ]*[eE][nN][dD]"*/"              return VERILOGEND;
+
 %%
