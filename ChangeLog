@@ -1,0 +1,11 @@
+17-01-2005   Version 0.2.1
+          
+             Corrected bug in else if
+             Translate true and false into 1 and 0
+
+
+21-12-2004   Version 0.2
+ 
+             Added support for enumerate data types
+             Added Directives      
+             Added new sensitive constructions

@@ -112,7 +112,7 @@ main()
 %token NUMBER WORD SC_INT SC_UINT BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE WORD SYMBOL NEWLINE ENUM INCLUDE
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
 %token SC_BIGINT SC_BIGUINT HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR INTCONV
-%token VOID 
+%token VOID TTRUE TFALSE
 %token PIFDEF PENDDEF PELSE
 
 %%
@@ -207,7 +207,11 @@ command:
 	|
 	endif
 	|
-	else
+	pelse
+	|
+	ttrue
+	|
+	tfalse
 	;
 
  
@@ -433,7 +437,7 @@ word:
 					 }
 					 else
 					 {
-					   fprintf(file,"%s",(char *)$1);
+					   fprintf(file,"%s ",(char *)$1);
 					 }
 				   }
 				   else
@@ -663,6 +667,7 @@ openkey:
 				if(processfound)
 					if(openedkeys != switchparenthesis)
 					{	
+					    fprintf(file,"\n");
 						for(i = 0; i < openedkeys; i++)
 							fprintf(file,"   ");
 						fprintf(file,"begin\n");
@@ -939,7 +944,7 @@ endif:
 			}else if(verilog==1)
 		       fprintf(file,"#endif");
 			};
-else:
+pelse:
        PELSE
 	   {
             if(translate==1&& verilog==0){
@@ -953,4 +958,28 @@ else:
 				}
 			}else if(verilog==1)
 		       fprintf(file,"#else");
+			};
+ttrue:
+      TTRUE
+	  {
+	        if(translate==1&& verilog==0){
+				if(processfound)
+				{
+					fprintf(file,"1");
+				}
+			}else if(verilog==1)
+		       fprintf(file,"1");
+			};
+
+
+tfalse:
+      TFALSE
+	  {
+	        if(translate==1&& verilog==0){
+				if(processfound)
+				{
+					fprintf(file,"0");
+				}
+			}else if(verilog==1)
+		       fprintf(file,"0");
 			};

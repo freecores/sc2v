@@ -32,6 +32,8 @@ extern int yylval;
 
 %%
 "void"                              return VOID;
+"true"                              return TTRUE;
+"false"                             return TFALSE;
 [0-9]+                              yylval=atoi(yytext); return NUMBER;
 "::"                                return TWODOUBLEPOINTS;
 sc_int                              return SC_INT;

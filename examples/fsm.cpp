@@ -27,6 +27,12 @@ verilog end*/
 	  case S0 : 
 		  if(input1.read()){
 	         next_state.write(S1);
+		     a.write(true); 
+		  }else if (input2.read()){
+			 next_state.write(S2);
+		     a.write(false); 
+		  }else{
+			 next_state.write(S0);
 		     a.write(1); 
 		  }
 		  break;
