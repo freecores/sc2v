@@ -84,6 +84,11 @@ bool                                if(!includefound & !linecomment & !multiline
 "/*"                    if (!linecomment) multilinecomment = 1; yylval=(int)strdup(yytext); return WORD;
 "*/"                    if (multilinecomment) multilinecomment = 0; yylval=(int)strdup(yytext); return WORD;
 
+"("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+"("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+"("[ ]*"sc_int"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+"("[ ]*"sc_bigint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][fF][fF]  return TRANSLATEOFF;  /*Translate directive*/
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][nN]      return TRANSLATEON;   /*Translate directive*/
 "/*"[ ]*[vV][eE][rR][iI][lL][oO][gG][ ]*[bB][eE][gG][iI][nN]  return VERILOGBEGIN;

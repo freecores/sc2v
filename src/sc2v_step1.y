@@ -95,10 +95,13 @@ main()
 	file_writes = (char *)malloc(256*sizeof(int));
 	strcpy(file_writes, (char *)"file_writes.sc2v");	
 	FILE_WRITES = fopen(file_writes,(char *)"w");
-			if(FILE_WRITES!=NULL)
-				printf("\nopening file => filename = %s\n",file_writes);
 
-    translate=1;
+        if(FILE_WRITES!=NULL)
+	  printf("\nopening file => filename = %s\n",file_writes);
+  
+        lastword=malloc(sizeof(char)*256);
+
+        translate=1;
 	verilog=0;
 	writemethod=0;
 	
@@ -408,17 +411,22 @@ word:
 				    fprintf(file,"begin\n");
 				    openedcase = 0;
 			     }	
-				 
-				 lastword=malloc(sizeof(char)*strlen((char *)$1));
-			     strcpy(lastword, (char *)$1);
+		
+                      	     strcpy(lastword, (char *)$1);
 			     
 			     if(reg_found)
 			     {
+			
+			      regname=malloc(sizeof(char)*(strlen((char *)$1)+1));
+      			      regname2=malloc(sizeof(char)*(strlen((char *)$1)+strlen(processname))+1);
+		      
 			      strcpy(regname ,(char *)$1);
-			      strcpy(regname2 ,(char *)$1);
+ 	                      strcpy(regname2 ,(char *)$1);
 			      strcat(regname2, processname);
 			      fprintf(regs_file,"%s",regname2);
 			      InsertReg(regslist, regname, regname2);			      
+			      free(regname);
+			      free(regname2);
 			     }
 			     else 
 			     {
@@ -445,6 +453,7 @@ word:
 					 
 				   newline = 0;
 			     }
+			     
 			  }
 			  else if(definefound)
 			  {
@@ -485,7 +494,7 @@ write:
 		WRITE
 			{
 			if(translate==1&& verilog==0){
-                writemethod=1;			
+                                writemethod=1;			
 				if(processfound)
 				{
 					fprintf(file," = ");
@@ -495,7 +504,6 @@ write:
 				{
 					fprintf(FILE_DEFINES," = ");
 				}
-				free(lastword);
 				
 			}else if(verilog==1){
 			    fprintf(file,".write");
@@ -661,8 +669,8 @@ openkey:
 					processfound = 1;
 					regslist = (RegsList *)malloc(sizeof(RegsList));
 					InitializeRegsList(regslist);
-					regname = (char *)malloc(256*sizeof(int));
-					regname2 = (char *)malloc(256*sizeof(int));
+			/*		regname = (char *)malloc(256*sizeof(int));
+					regname2 = (char *)malloc(256*sizeof(int));*/
 				}
 				if(processfound)
 					if(openedkeys != switchparenthesis)
@@ -723,8 +731,8 @@ closekey:
 					fclose(file);
 					fclose(regs_file);
 					free(regslist);
-					free(regname);
-					free(regname2);
+/*					free(regname);
+					free(regname2);*/
 					processfound = 0;
 				}
 			}else if(verilog==1)
