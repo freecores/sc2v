@@ -543,7 +543,6 @@ WORD
 	      fprintf (regs_file, "%s", regname2);
 
 	      regslist = InsertReg (regslist, regname, regname2);
-
 	      free (regname);
 	      free (regname2);
 	    }

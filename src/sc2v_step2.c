@@ -134,7 +134,7 @@ ShowPortList (PortNode * list)
 }
 
 void
-RegOutputs (PortNode * list)
+RegOutputs (PortNode * list, InstanceNode *instances)
 {
 
   PortNode *pll;
@@ -142,12 +142,14 @@ RegOutputs (PortNode * list)
   {
 	if (strcmp (pll->tipo, "output") == 0)
 	{
+	 if(!IsWire(pll->name,instances)){
 	  printf ("reg ");
 	  if (pll->size != 0 && pll->size != 1)
 	  {
 	    printf ("[%d:0] ", (-1 + pll->size));}
 	    printf ("%s;\n", pll->name);}
 	  }
+	 }
   );
   return;
 }
@@ -438,16 +440,12 @@ ShowEnumeratesList (EnumeratesNode *list)
   EnumeratesNode *ell;
   int i = 0;
   
-  SGLIB_LIST_REVERSE(EnumeratesNode, list, next);
-  
   printf ("parameter  %s = 0", list->name);
-  
-  if(list->next!=NULL)
-    list=list->next;
-  
+    
   if(list->next!=NULL){
-	printf(",\n");
-	i=1;
+    list=list->next;
+    printf(",\n");
+    i=1;
     SGLIB_LIST_MAP_ON_ELEMENTS (EnumeratesNode,list, ell,next,
     {
       if(ell->next==NULL)
@@ -505,9 +503,9 @@ ShowEnumListList (EnumListNode * list)
 
 	  if (!(ell->istype))
 	    {
-        if ((bits_i - 1) != 0)
+            if ((bits_i - 1) != 0)
 		  printf ("reg [%d:0] %s;\n\n", bits_i - 1, ell->name);
-        else
+            else
   		  printf ("reg %s;\n\n", ell->name);
 	    }
 

@@ -91,10 +91,10 @@ bool                                if(!includefound & !linecomment & !multiline
 "/*"                    if (!linecomment) multilinecomment = 1; yylval=(int)strdup(yytext); return WORD;
 "*/"                    if (multilinecomment) multilinecomment = 0; yylval=(int)strdup(yytext); return WORD;
 
-"("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
-"("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
-"("[ ]*"sc_int"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
-"("[ ]*"sc_bigint"[ ]*"<"[ ]*[0-9+][ ]*">"[ ]*")"
+"("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_int"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_bigint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
 "("[ ]*"int"[ ]*")"
 
 

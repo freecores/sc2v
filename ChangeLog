@@ -4,6 +4,9 @@
              for loops with int type as index supported
              Support hex numbers in switchs 
 	     Support sc_signals arrays
+             Corrected bug when connecting a output port to another
+             Solved problem in type conversions
+             Solved problem with enumeration list	     
 
 25-02-2005   Version 0.4
 

@@ -113,7 +113,7 @@
 
     ShowPortList (portlist);
     printf ("\n");
-    RegOutputs (portlist);
+    RegOutputs (portlist,instanceslist);
     printf ("\n");
 
     ShowEnumListList (enumlistlist);

@@ -102,6 +102,12 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 "|"
 "~"
 
+"("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_int"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"sc_bigint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
+"("[ ]*"int"[ ]*")"
+
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][fF][fF]  return TRANSLATEOFF;  /*Translate directive*/
 "//"[ ]*[tT][rR][aA][nN][sS][lL][aA][tT][eE][ ]*[oO][nN]      return TRANSLATEON;  /*Translate directive*/
 %%

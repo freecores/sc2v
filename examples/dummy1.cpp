@@ -3,7 +3,7 @@
 #define HOLA 1
 #define CONCAT 1
 
-sc_uint<2> fsm::func1(sc_uint<2> a, sc_uint<2> b){
+sc_uint<2> dummy1::func1(sc_uint<2> a, sc_uint<2> b){
    sc_uint<2> c;
    c=a+b;
    return c+5;
@@ -11,7 +11,7 @@ sc_uint<2> fsm::func1(sc_uint<2> a, sc_uint<2> b){
 
 
 void
-fsm::regs ()
+dummy1::regs ()
 {
   if (rst.read ())
     {
@@ -22,7 +22,7 @@ fsm::regs ()
 }
 
 void
-fsm::fsm_proc ()
+dummy1::fsm_proc ()
 {
 /*Verilog begin
 	cfsm_proc={a[1:0],b[1:0]};
