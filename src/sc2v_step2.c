@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -571,3 +571,104 @@ findEnumerateLength (EnumListNode * list, int offset)
    return bits_i;
     	
  }
+
+ /* Functions for functions inputs list*/
+FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght){
+  FunctionInputNode *fl;
+  fl = (FunctionInputNode *) malloc (sizeof (FunctionInputNode));
+  strcpy (fl->name, name);
+  fl->lenght=lenght;
+  SGLIB_LIST_ADD (FunctionInputNode, list, fl, next);
+  return (list);
+}
+
+void ShowFunctionInputs (FunctionInputNode * list){
+
+  FunctionInputNode *fll;
+    	
+  SGLIB_LIST_MAP_ON_ELEMENTS (FunctionInputNode,list, fll,next,
+  {
+	if(fll->lenght!=1)
+     printf("input [%d:0] %s;\n",(fll->lenght)-1,fll->name); 
+    else
+	 printf("input %s;\n",fll->name); 
+  });
+}
+
+/* Functions for functions list*/
+FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght){
+  FunctionNode *fl;
+  fl = (FunctionNode *) malloc (sizeof (FunctionNode));
+  strcpy (fl->name, name);
+  fl->outputlenght=outputlenght;
+  fl->list = InputsList;
+  SGLIB_LIST_ADD (FunctionNode, list, fl, next);
+  return (list);
+}
+
+void ShowFunctionCode (FunctionNode *list){
+  
+  FILE *archivo;
+  int readok;
+  char *filename;
+  char auxchar;	
+  char begin[10];
+	
+  FunctionNode *fll;
+    	
+  SGLIB_LIST_MAP_ON_ELEMENTS (FunctionNode,list, fll,next,
+  {
+	if(fll->outputlenght!=1)
+     printf("function [%d:0] %s;\n\n",(fll->outputlenght)-1,fll->name); 
+    else
+	 printf("function %s;\n\n",fll->name); 
+	
+	ShowFunctionInputs(fll->list);
+	
+	//Show Registers
+	filename =(char *) malloc (256 * sizeof (char));
+	strcpy (filename, fll->name);
+	strcat (filename, (char *) "_regs.sc2v");
+	archivo = fopen (filename, (char *) "r");
+	if(archivo==NULL){
+		fprintf(stderr,"Error opening file %s\n",filename);
+		exit(1);
+	}
+	printf("\n");	
+	while (1)
+	{
+	  readok =fread ((void *) &auxchar, sizeof (char), 1,archivo);
+	  if (readok) printf ("%c", auxchar);
+	  else{
+		break;
+	  }
+	}
+    fclose (archivo);
+	
+	printf ("\n   begin\n");
+    strcpy (filename, fll->name);
+    strcat (filename, (char *) ".sc2v");
+    archivo = fopen (filename, (char *) "r");
+
+	/*Read the initial begin of the file */
+    fscanf (archivo, "%s", begin);
+    readok =fread ((void *) &auxchar, sizeof (char), 1,archivo);
+			      
+	/*Trim the beggining of the file */
+	while (auxchar == '\n' || auxchar == ' ' || auxchar == '\t') 
+	    readok =fread ((void *) &auxchar, sizeof (char), 1,archivo); printf ("\n   %c", auxchar);
+	
+	while (1){
+	  readok = fread ((void *) &auxchar, sizeof (char), 1,archivo); 
+	  if (readok)
+	     printf ("%c", auxchar);
+	  else
+         break;
+	}
+    printf("endfunction\n\n");
+	
+    fclose (archivo);
+	
+  });
+  
+}

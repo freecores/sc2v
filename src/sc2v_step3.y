@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -31,6 +31,7 @@
   int opened_pars;
   int *concat_par_num;
   int concats_found = 0;
+  int lastsymbol=0;
   char *aux;
   void yyerror (const char *str)
   {
@@ -52,9 +53,9 @@
 
 %}
 
-%token WORD 
+%token WORD WORDCOLON
 %token OPENPAR CLOSEPAR 
-%token MODULE 
+%token MODULE SYMBOL
 
 %% commands:
 /* empty */
@@ -67,12 +68,17 @@ module
 closepar 
 | 
 concat 
-| 
-openpar;
+|
+openpar
+|
+word
+|
+symbol;
 
 module:
 MODULE
 {
+  lastsymbol=0;
   module_found = 1;
   opened_pars++;
   printf ("%s", (char *) $1);
@@ -119,8 +125,9 @@ CLOSEPAR
 };
 
 concat:
-WORD
+WORDCOLON
 {
+ if(lastsymbol==1){
   aux = (char *) $1;
   aux++;
   printf ("{%s", aux);
@@ -128,4 +135,22 @@ WORD
   opened_pars++;
   concats_found++;
   *(concat_par_num + concats_found) = opened_pars;
+ }else{
+   printf ("%s", (char *)$1);
+ } 
+ lastsymbol=0;
+};
+
+symbol:
+SYMBOL
+{
+  lastsymbol=1;
+  printf("%c",*((char *)$1));
+};
+
+word:
+WORD
+{
+  lastsymbol=0;
+  printf("%s",(char *)$1);
 };

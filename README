@@ -39,9 +39,7 @@ fonts. It will generate three executables: sc2v_step1 and sc2v_step2 sc2v_step3.
 
 2- Translating an SystemC module:
 
-The translation is done in two steps. First you must translate the .cpp file by
-typing:	sc2v_step1 < file.cpp
-Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
+To translate use sc2v.sh script in the /bin directory just writting sc2v.sh module_name
 
 3- Format and restrictions of the SystemC files:
 	
@@ -51,8 +49,6 @@ Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
 	
 	- For writing to a port or a signal you must ALWAYS use the .write()
 	method.
-	
-	- You cannot use functions.
 	
 	-Macros not fully supported.
 	
@@ -65,8 +61,8 @@ Second step consists in traslating the .h file: sc2v_step2 < file.h > file.v
 
 	-The usage of macros and defines may cause some errors.
 		
-5- For testing the application we recommend to use the systemcdes or the
-systemcmd5 cores, both available at www.opencores.org.
+5- For testing the application we recommend to use the systemcdes,systecaes and
+systemcmd5 cores, available at www.opencores.org.
 
 6- For any doubt, comment, or for reporting bugs, feel free to write to
 sc2v@opensocdesign.com
@@ -75,5 +71,4 @@ sc2v@opensocdesign.com
 TODO:
 
 	- Repair all known bugs.
-	- Make functions supported.
 	- Make macros fully supported.

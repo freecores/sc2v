@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -32,11 +32,11 @@ extern int yylval;
 
 %%
 "module"[" "]*[a-zA-Z][_a-zA-Z0-9]*[" "]*["("] yylval=(int)strdup(yytext); return MODULE;
-"("[" "]*[a-zA-Z][_a-zA-Z0-9" "\[\]:]*[,]       yylval=(int)strdup(yytext); return WORD;
-"("                                        return OPENPAR;
-")"                                        return CLOSEPAR;
-
-
+"("[" "]*[a-zA-Z][_a-zA-Z0-9" "\[\]:]*[,][ ]*  yylval=(int)strdup(yytext); return WORDCOLON;
+[" "]*[a-zA-Z][_a-zA-Z0-9" "\[\]:]*            yylval=(int)strdup(yytext); return WORD;
+"("[ ]*                                        return OPENPAR;
+[ ]*")"                                        return CLOSEPAR;
+[.:"^"!%=/+*_"&""-"<>"?""|""\\"][ ]*           yylval=(int)strdup(yytext); return SYMBOL;
 
 
 %%

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -61,6 +61,22 @@ typedef struct _instance_node
   struct _instance_node *next;
 } InstanceNode;
 
+typedef struct _funcinput_node
+{
+  int lenght;
+  char name[MAX_NAME_LENGTH];
+  struct _funcinput_node *next;
+} FunctionInputNode;
+
+
+typedef struct _function_node
+{
+  char name[MAX_NAME_LENGTH];
+  int outputlenght;
+  FunctionInputNode *list;
+  struct _function_node *next;
+} FunctionNode;
+
 typedef struct _sensibility_node
 {
   char tipo[MAX_NAME_LENGTH];
@@ -107,6 +123,12 @@ typedef struct _enumlist_node
 /*List of enumerates*/
   EnumeratesNode *enumerateslist;
   EnumListNode *enumlistlist;
+/* Global var to store functions inputs list*/
+  FunctionInputNode *funcinputslist;
+/* Global var to store process list*/
+  FunctionNode *functionslist;
+
+
 
 /* Functions for DEFINES list*/
 void ShowDefines (char *filedefines);
@@ -149,3 +171,11 @@ EnumListNode *InsertEnumList (EnumListNode * list, EnumeratesNode * enumlist,cha
 void ShowEnumListList (EnumListNode * list);
 int findEnumList (EnumListNode * list, char *name);
 int findEnumerateLength (EnumListNode * list, int offset);
+
+/* Functions for functions inputs list*/
+FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght);
+void ShowFunctionInputs (FunctionInputNode * list);
+
+/* Functions for functions list*/
+FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght);
+void ShowFunctionCode (FunctionNode *list);

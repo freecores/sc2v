@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -28,7 +28,7 @@
 
 #include "sc2v_step1.h"
 
-  int lineno=1;
+  int lineno = 1;
   int processfound = 0;
   int switchfound = 0;
   int switchparenthesis[256];
@@ -77,13 +77,14 @@
   main ()
   {
     int i;
-	
-	defineslist=NULL;
-	regslist=NULL;
 
-	fprintf(stderr,"\nSystemC to Verilog Translator v0.3");
-	fprintf(stderr,"\nProvided by OpenSoc http://www.opensocdesign.com\n\n");
-	fprintf(stderr,"Parsing implementation file.......\n\n");
+    defineslist = NULL;
+    regslist = NULL;
+
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.3");
+    fprintf (stderr,
+	     "\nProvided by OpenSoc http://www.opensocdesign.com\n\n");
+    fprintf (stderr, "Parsing implementation file.......\n\n");
 
     processname = (char *) malloc (256 * sizeof (char));
     processname2 = (char *) malloc (256 * sizeof (char));
@@ -92,12 +93,12 @@
     file_defines = (char *) malloc (256 * sizeof (char));
     strcpy (file_defines, (char *) "file_defines.sc2v");
     FILE_DEFINES = fopen (file_defines, (char *) "w");
-	  
+
     file_writes = (char *) malloc (256 * sizeof (char));
     strcpy (file_writes, (char *) "file_writes.sc2v");
     FILE_WRITES = fopen (file_writes, (char *) "w");
 
-    lastword = (char *)malloc (sizeof (char) * 256);
+    lastword = (char *) malloc (sizeof (char) * 256);
 
     for (i = 0; i < 256; i++)
       switchparenthesis[i] = 0;
@@ -105,29 +106,31 @@
     translate = 1;
     verilog = 0;
     writemethod = 0;
-	
-    FILE* yyin = stdin;
-    FILE* yyout = stdout;
+
+    FILE *yyin = stdin;
+    FILE *yyout = stdout;
     yyparse ();
     fclose (FILE_WRITES);
     fclose (FILE_DEFINES);
-	
-	fprintf(stderr,"\nDone\n\n");
+
+    fprintf (stderr, "\nDone\n\n");
   }
 
 %}
 
-%token NUMBER WORD SC_INT SC_UINT BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE WORD SYMBOL NEWLINE ENUM INCLUDE 
-%token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK 
-%token SC_BIGINT SC_BIGUINT HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR INTCONV 
-%token VOID TTRUE TFALSE 
+%token NUMBER WORD SC_REG BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE WORD SYMBOL NEWLINE ENUM INCLUDE 
+%token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
+%token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR INTCONV 
+%token VOID TTRUE TFALSE ENDFUNC 
 %token PIFDEF PENDDEF PELSE 
 
-%% commands:/* empty */
+%% commands:	/* empty */
 |commands command;
 
 
 command:
+endfunc
+  |
   voidword
   |
   include
@@ -140,13 +143,7 @@ command:
   |
   read
   |
-  sc_int
-  |
-  sc_uint
-  |
-  sc_bigint
-  |
-  sc_biguint
+  sc_reg
   |
   number
   |
@@ -172,56 +169,44 @@ command:
   |
   openpar
   |
-  closepar 
-  | 
-  void 
-  |
-  opencorch 
-  | 
-  closecorch 
-  | 
-  bigger
-  | 
-  lower 
-  | 
-  switch 
-  |
-  case_only
-  |
-  case_number
-  |
-  case_word
-  |
-  case_default
-  |
-  break
-  |
-  hexa
-  |
-  definemacro
-  |
-  defineword
-  |
-  definenumber
-  |
-  translateoff
-  |
-  translateon
-  | 
-  verilogbegin 
-  | 
-  verilogend 
-  | 
-  ifdef 
-  | 
-  endif 
-  | 
-  pelse 
-  | 
-  ttrue 
-  | 
-  tfalse;
+  closepar | void |opencorch | closecorch | bigger | lower | switch |case_only
+  |case_number
+    |
+    case_word
+    |
+    case_default
+    |
+    break
+    |hexa
+    |
+    definemacro
+    |
+    defineword
+    |
+    definenumber
+    |
+    translateoff
+    |
+    translateon
+    | verilogbegin | verilogend | ifdef | endif | pelse | ttrue | tfalse;
 
+
+endfunc:
+ENDFUNC
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  for (i = 0; i < openedkeys; i++)
+	    fprintf (file, "   ");
+	  fprintf (file, "%s = ", processname);
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "return ");
+};
 
 
 voidword:
@@ -278,19 +263,19 @@ READ OPENPAR CLOSEPAR
 defineword:
 DEFINE WORD WORD
 {
-  
+
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
 	{
 	  fprintf (file, "`define %s %s\n", (char *) $2, (char *) $3);
-	  defineslist=InsertDefine(defineslist,(char *)$2);
+	  defineslist = InsertDefine (defineslist, (char *) $2);
 	}
       else
 	{
 	  fprintf (FILE_DEFINES, "`define %s %s\n", (char *) $2, (char *) $3);
-	  defineslist=InsertDefine(defineslist,(char *)$2);
+	  defineslist = InsertDefine (defineslist, (char *) $2);
 	}
     }
   else if (verilog == 1)
@@ -301,19 +286,19 @@ DEFINE WORD WORD
 definenumber:
 DEFINE WORD NUMBER
 {
-    
+
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
 	{
 	  fprintf (file, "`define %s %d\n", (char *) $2, (int) $3);
-	  defineslist=InsertDefine(defineslist,(char *)$2);
+	  defineslist = InsertDefine (defineslist, (char *) $2);
 	}
       else
 	{
 	  fprintf (FILE_DEFINES, "`define %s %d\n", (char *) $2, (int) $3);
-      defineslist=InsertDefine(defineslist,(char *)$2);
+	  defineslist = InsertDefine (defineslist, (char *) $2);
 	}
     }
   else if (verilog == 1)
@@ -325,14 +310,12 @@ DEFINE WORD NUMBER
 definemacro:
 DEFINE WORD OPENPAR CLOSEPAR
 {
-  
- 
   defineparenthesis = 0;
   //Macro found
   if (translate == 1 && verilog == 0)
     {
-	  defineslist=InsertDefine(defineslist,(char *)$2);
-      
+      defineslist = InsertDefine (defineslist, (char *) $2);
+
       definefound = 1;
       if (processfound)
 	fprintf (file, "`define %s ", (char *) $2);
@@ -343,8 +326,7 @@ DEFINE WORD OPENPAR CLOSEPAR
     fprintf (file, "#define %s ()", (char *) $2);
 }
 
-void:
-WORD TWODOUBLEPOINTS WORD OPENPAR CLOSEPAR
+void:WORD TWODOUBLEPOINTS WORD OPENPAR
 {
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
@@ -360,8 +342,8 @@ WORD TWODOUBLEPOINTS WORD OPENPAR CLOSEPAR
 
 }
 
-sc_int:
-SC_INT LOWER NUMBER BIGGER
+sc_reg:
+SC_REG LOWER NUMBER BIGGER
 {
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
@@ -372,66 +354,7 @@ SC_INT LOWER NUMBER BIGGER
 	  reg_found = 1;
 	}
     }
-  else if (verilog == 1)
-    fprintf (file, "sc_int<%d>", $3);
-
-}
-
-;
-
-sc_uint:
-SC_UINT LOWER NUMBER BIGGER
-{
-  defineparenthesis = 0;
-  if (translate == 1 && verilog == 0)
-    {
-      if (processfound)
-	{
-	  fprintf (regs_file, "reg[%d:0] ", (-1 + $3));
-	  reg_found = 1;
-	}
-    }
-  else if (verilog == 1)
-    fprintf (file, "sc_uint<%d>", $3);
-}
-
-;
-
-sc_bigint:
-SC_BIGINT LOWER NUMBER BIGGER
-{
-  defineparenthesis = 0;
-  if (translate == 1 && verilog == 0)
-    {
-      if (processfound)
-	{
-	  fprintf (regs_file, "reg[%d:0] ", (-1 + $3));
-	  reg_found = 1;
-	}
-    }
-  else if (verilog == 1)
-    fprintf (file, "sc_bigint<%d> ", $3);
-}
-
-;
-
-sc_biguint:
-SC_BIGUINT LOWER NUMBER BIGGER
-{
-  defineparenthesis = 0;
-  if (translate == 1 && verilog == 0)
-    {
-      if (processfound)
-	{
-	  fprintf (regs_file, "reg[%d:0] ", (-1 + $3));
-	  reg_found = 1;
-	}
-    }
-  else if (verilog == 1)
-    fprintf (file, "sc_biguint<%d> ", $3);
-}
-
-;
+};
 
 bool:
 BOOL
@@ -495,7 +418,7 @@ NUMBER
 word:
 WORD
 {
-  
+
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
@@ -517,17 +440,21 @@ WORD
 	  if (reg_found)
 	    {
 
-	      regname = (char *)malloc (sizeof (char) * (strlen ((char *) $1) + 1));
-	      regname2 =(char *)malloc (sizeof (char) *(strlen ((char *) $1) + strlen (processname)) + 1);
+	      regname =
+		(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
+	      regname2 =
+		(char *) malloc (sizeof (char) *
+				 (strlen ((char *) $1) +
+				  strlen (processname)) + 1);
 
 	      strcpy (regname, (char *) $1);
 	      strcpy (regname2, (char *) $1);
 	      strcat (regname2, processname);
 	      fprintf (regs_file, "%s", regname2);
-		  
-		  regslist=InsertReg(regslist,regname,regname2); 
-	
-  	      free (regname);
+
+	      regslist = InsertReg (regslist, regname, regname2);
+
+	      free (regname);
 	      free (regname2);
 	    }
 	  else
@@ -537,11 +464,11 @@ WORD
 		  for (i = 0; i < openedkeys; i++)
 		    fprintf (file, "   ");
 		}
-	      regname2 = IsReg (regslist,(char *) $1);
+	      regname2 = IsReg (regslist, (char *) $1);
 	      if (regname2 == NULL)
 		{
-		  
-		  if (IsDefine(defineslist,(char *)$1))
+
+		  if (IsDefine (defineslist, (char *) $1))
 		    {
 		      if (ifdeffound == 0)
 			{
@@ -568,8 +495,8 @@ WORD
 	}
       else if (definefound)
 	{
-	
-	 if (IsDefine(defineslist,(char *)$1))
+
+	  if (IsDefine (defineslist, (char *) $1))
 	    {
 
 	      fprintf (FILE_DEFINES, "`%s", (char *) $1);
@@ -742,7 +669,6 @@ CLOSEPAR
 	      fprintf (file, ")");
 	      defineinvocationfound = 0;
 	    }
-
 	}
       else if (definefound)
 	{
@@ -822,7 +748,7 @@ OPENKEY
 	      file = fopen (processname2, (char *) "w");
 	      regs_file = fopen (fileregs, (char *) "w");
 	      processfound = 1;
-   	    }
+	    }
 	  if (processfound)
 	    if (openedkeys != switchparenthesis[switchfound])
 	      {
@@ -857,7 +783,7 @@ CLOSEKEY
 		  default_found = 0;
 		}
 	      for (i = 0; i < openedkeys - 1; i++)
-		  fprintf (file, "   ");
+		fprintf (file, "   ");
 	      fprintf (file, "endcase\n");
 	      newline = 1;
 	      switchparenthesis[switchfound] = 0;
@@ -868,7 +794,7 @@ CLOSEKEY
 	    {
 	      fprintf (file, "\n");
 	      for (i = 0; i < openedkeys; i++)
-		    fprintf (file, "   ");
+		fprintf (file, "   ");
 	      fprintf (file, "end\n");
 	      newline = 1;
 	    }

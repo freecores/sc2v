@@ -1,5 +1,7 @@
-/* This is a example code with the new constructions supported
-by sc2v 0.2 */
+/* 
+This is a example code that does nothing but uses the new
+features included in new versions
+*/
 
 
 #include "systemc.h"
@@ -22,6 +24,7 @@ SC_MODULE(fsm){
 
    void regs();
    void fsm_proc();
+   sc_uint<2> func1 (sc_uint<2> a, sc_uint<2> b);
    
    SC_CTOR(fsm){
    

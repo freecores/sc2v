@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -33,7 +33,7 @@
   char *enumname;
 
   int reading_enumerates = 0;
-  int lineno=1;
+  int lineno = 1;
 
 /*Multiple Declarations*/
   int multipledec;
@@ -65,6 +65,9 @@
   char *last_sensibility;
   int sensibility_active = 0;
 
+/* Global var to store last function found*/
+  char *functionname;
+  int outputlenght = 0;
 
   int translate;
 
@@ -87,36 +90,35 @@
     writeslist = NULL;
     portlist = NULL;;
     signalslist = NULL;
-    sensibilitylist=NULL;
-    processlist=NULL;
+    sensibilitylist = NULL;
+    processlist = NULL;
     instanceslist = NULL;
     enumlistlist = NULL;
+    funcinputslist = NULL;
+    functionslist = NULL;
 
     translate = 1;
 
-    fprintf(stderr,"\nSystemC to Verilog Translator v0.3\n\n");
-    fprintf(stderr,"Parsing header file.......\n\n");
-	
-    FILE* yyin = stdin;
-    FILE* yyout = stdout;
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.3\n\n");
+    fprintf (stderr, "Parsing header file.......\n\n");
+
+    FILE *yyin = stdin;
+    FILE *yyout = stdout;
 
     yyparse ();
-
 
     printf ("module %s(", module_name);
     EnumeratePorts (portlist);
     printf (");\n");
-
 
     ShowPortList (portlist);
     printf ("\n");
     RegOutputs (portlist);
     printf ("\n");
 
-
     ShowEnumListList (enumlistlist);
 
-    writeslist=ReadWritesFile (writeslist,(char *) "file_writes.sc2v");
+    writeslist = ReadWritesFile (writeslist, (char *) "file_writes.sc2v");
 
     ShowSignalsList (signalslist, writeslist);
 
@@ -127,18 +129,20 @@
 
     ShowDefines ((char *) "file_defines.sc2v");
 
+    ShowFunctionCode (functionslist);
+
     ShowProcessCode (processlist);
     printf ("\n");
 
     printf ("endmodule\n");
 
-	fprintf(stderr,"\nDone\n");
+    fprintf (stderr, "\nDone\n");
   }
 
 %}
 
 %token NUMBER SC_MODULE WORD OPENPAR CLOSEPAR SC_IN SC_OUT SEMICOLON BOOL ENUM 
-%token MENOR MAYOR SC_INT SC_UINT SC_METHOD SENSITIVE_POS SENSITIVE_NEG SENSITIVE 
+%token MENOR MAYOR SC_REG SC_METHOD SENSITIVE_POS SENSITIVE_NEG SENSITIVE 
 %token SENSIBLE CLOSEKEY OPENKEY SEMICOLON COLON SC_SIGNAL ARROW EQUALS NEW QUOTE 
 %token SC_CTOR VOID ASTERISCO TRANSLATEON TRANSLATEOFF 
 
@@ -150,15 +154,11 @@ module
   |
   in_bool
   |
-  in_sc_int
-  |
-  in_sc_uint
+  in_sc_reg
   |
   out_bool
   |
-  out_sc_int
-  |
-  out_sc_uint
+  out_sc_reg
   |
   sc_method
   |
@@ -190,9 +190,7 @@ module
   |
   signal_bool
   |
-  signal_uint
-  |
-  signal_int
+  signal_reg
   |
   instantation
   |
@@ -201,8 +199,7 @@ module
   sc_ctor
   |
   void
-  |
-  inst_decl
+  |inst_decl
   |
   closekey_semicolon
   |
@@ -215,13 +212,19 @@ module
   declaration_sc_signal
   |
   multiple_declaration
-  | 
-  multiple_sc_signal_declaration 
-  | 
-  translateoff 
-  | 
-  translateon;
-
+  |
+  multiple_sc_signal_declaration
+  |
+  translateoff
+  |
+  translateon
+  |
+  function
+  |
+  functioninputs
+  |
+  finishfunctioninputs
+  | boolfunction | boolfunctioninputs | boolfinishfunctioninputs;
 
 module:
 SC_MODULE OPENPAR WORD CLOSEPAR OPENKEY
@@ -231,198 +234,90 @@ SC_MODULE OPENPAR WORD CLOSEPAR OPENKEY
     {
 
       if (module_name_found)
-
 	{
-
-	  fprintf (stderr, "line: %d error: two or more modules found in the file\n",lineno);
-
+	  fprintf (stderr,
+		   "line: %d error: two or more modules found in the file\n",
+		   lineno);
 	  exit (1);
-
 	}
-
       else
-
 	{
-
 	  module_name = (char *) malloc (256 * sizeof (char));
-
 	  strcpy (module_name, (char *) $3);
-
 	  module_name_found = 1;
-
 	}
     }
 
-}
-
-;
-
-
-
-in_sc_uint:
-SC_IN MENOR SC_UINT MENOR NUMBER MAYOR MAYOR
-{
-
-  if (translate == 1)
-    {
-
-      activeport = 1;
-
-      lastportsize = $5;
-
-      lastportkind = (char *) "input";
-
-    }
-
 };
 
 
-
-in_sc_int:
-SC_IN MENOR SC_INT MENOR NUMBER MAYOR MAYOR
+in_sc_reg:
+SC_IN MENOR SC_REG MENOR NUMBER MAYOR MAYOR
 {
-
   if (translate == 1)
     {
-
       activeport = 1;
-
       lastportsize = $5;
-
       lastportkind = (char *) "input";
-
     }
-
 };
-
-
 
 
 in_bool:
 SC_IN MENOR BOOL MAYOR
 {
-
   if (translate == 1)
     {
-
       activeport = 1;
-
       lastportsize = 0;
-
       lastportkind = (char *) "input";
-
     }
-
 };
-
 
 
 signal_bool:
 SC_SIGNAL MENOR BOOL MAYOR
 {
-
   if (translate == 1)
     {
-
       signalactive = 1;
-
       lastsignalsize = 0;
-
     }
-
 };
 
 
-
-signal_uint:
-SC_SIGNAL MENOR SC_UINT MENOR NUMBER MAYOR MAYOR
+signal_reg:
+SC_SIGNAL MENOR SC_REG MENOR NUMBER MAYOR MAYOR
 {
-
   if (translate == 1)
     {
-
       signalactive = 1;
-
       lastsignalsize = $5;
-
     }
-
 };
-
-
-
-signal_int:
-SC_SIGNAL MENOR SC_INT MENOR NUMBER MAYOR MAYOR
-{
-
-  if (translate == 1)
-    {
-
-      signalactive = 1;
-
-      lastsignalsize = $5;
-
-    }
-
-};
-
-
 
 out_bool:
 SC_OUT MENOR BOOL MAYOR
 {
-
   if (translate == 1)
     {
-
       activeport = 1;
-
       lastportsize = 0;
-
       lastportkind = (char *) "output";
-
     }
-
 };
 
-
-
-out_sc_uint:
-SC_OUT MENOR SC_UINT MENOR NUMBER MAYOR MAYOR
+out_sc_reg:
+SC_OUT MENOR SC_REG MENOR NUMBER MAYOR MAYOR
 {
-
   if (translate == 1)
     {
-
       activeport = 1;
-
       lastportsize = $5;
-
       lastportkind = (char *) "output";
-
     }
 
 };
-
-
-
-out_sc_int:
-SC_OUT MENOR SC_INT MENOR NUMBER MAYOR MAYOR
-{
-
-  if (translate == 1)
-    {
-
-      activeport = 1;
-
-      lastportsize = $5;
-
-      lastportkind = (char *) "output";
-
-    }
-
-};
-
 
 
 sc_method:
@@ -431,25 +326,17 @@ SC_METHOD OPENPAR WORD CLOSEPAR SEMICOLON
 
   if (translate == 1)
     {
-
       if (method_found)
-
 	{
-
-	  processlist=InsertProcess (processlist, active_method, sensibilitylist,
-			 active_method_type);
-      
+	  processlist =
+	    InsertProcess (processlist, active_method, sensibilitylist,
+			   active_method_type);
 	}
-
       active_method = (char *) $3;
-
       method_found = 1;
-
       /* New sensitivity list */
       sensibilitylist = NULL;
-      
     }
-
 };
 
 
@@ -457,15 +344,12 @@ SC_METHOD OPENPAR WORD CLOSEPAR SEMICOLON
 sensible_par_neg:
 SENSITIVE_NEG OPENPAR WORD CLOSEPAR SEMICOLON
 {
-
   if (translate == 1)
     {
-
       active_method_type = (char *) "seq";	//comb
-      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, "negedge");
-
+      sensibilitylist =
+	InsertSensibility (sensibilitylist, (char *) $3, "negedge");
     }
-
 };
 
 
@@ -473,15 +357,12 @@ SENSITIVE_NEG OPENPAR WORD CLOSEPAR SEMICOLON
 sensible_par_pos:
 SENSITIVE_POS OPENPAR WORD CLOSEPAR SEMICOLON
 {
-
   if (translate == 1)
     {
-
       active_method_type = (char *) "seq";	//comb
-      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, "posedge");
-
+      sensibilitylist =
+	InsertSensibility (sensibilitylist, (char *) $3, "posedge");
     }
-
 };
 
 
@@ -489,38 +370,24 @@ SENSITIVE_POS OPENPAR WORD CLOSEPAR SEMICOLON
 sensitive_pos:
 SENSITIVE_POS
 {
-
   if (translate == 1)
     {
-
       last_sensibility = (char *) "posedge";
-
       active_method_type = (char *) "seq";	//seq
       sensibility_active = 1;
-
     }
-
 };
-
-
 
 sensitive_neg:
 SENSITIVE_NEG
 {
-
   if (translate == 1)
     {
-
       last_sensibility = (char *) "negedge";
-
       active_method_type = (char *) "seq";	//seq
       sensibility_active = 1;
-
     }
-
 };
-
-
 
 sensitive:
 SENSITIVE
@@ -528,14 +395,10 @@ SENSITIVE
 
   if (translate == 1)
     {
-
       last_sensibility = (char *) " ";
-
       active_method_type = (char *) "comb";	//comb
       sensibility_active = 1;
-
     }
-
 };
 
 
@@ -543,15 +406,11 @@ SENSITIVE
 sensible_par_colon:
 SENSITIVE OPENPAR WORD CLOSEPAR SEMICOLON
 {
-
   if (translate == 1)
     {
-
       active_method_type = (char *) "comb";	//comb
-      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $3, " ");
-
+      sensibilitylist = InsertSensibility (sensibilitylist, (char *) $3, " ");
     }
-
 };
 
 
@@ -560,15 +419,12 @@ SENSITIVE OPENPAR WORD CLOSEPAR SEMICOLON
 sensible_word_colon:
 SENSIBLE WORD
 {
-
   if (translate == 1)
     {
-
-      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $2,
-			 (char *) last_sensibility);
-
+      sensibilitylist =
+	InsertSensibility (sensibilitylist, (char *) $2,
+			   (char *) last_sensibility);
     }
-
 };
 
 
@@ -576,45 +432,31 @@ SENSIBLE WORD
 sensible_word_semicolon:
 SENSIBLE WORD SEMICOLON
 {
-
   if (translate == 1)
     {
-
-      sensibilitylist=InsertSensibility (sensibilitylist, (char *) $2,
-			 (char *) last_sensibility);
-
+      sensibilitylist =
+	InsertSensibility (sensibilitylist, (char *) $2,
+			   (char *) last_sensibility);
       if (sensibility_active)
-
 	{
-
 	  sensibility_active = 0;
-
 	}
-
     }
-
 };
 
 closekey:
 CLOSEKEY
 {
-
   if (translate == 1)
     {
-
       if (method_found)
-
 	{
-
 	  method_found = 0;
-
-	  processlist=InsertProcess (processlist, active_method, sensibilitylist,
-			 active_method_type);
-
+	  processlist =
+	    InsertProcess (processlist, active_method, sensibilitylist,
+			   active_method_type);
 	}
-
     }
-
 };
 
 
@@ -622,72 +464,47 @@ CLOSEKEY
 word_semicolon:
 WORD SEMICOLON
 {
-
   if (translate == 1)
     {
-
       if (activeport)
-
 	{
-
-	  portlist=InsertPort (portlist,(char *) $1, lastportkind, lastportsize);
-
+	  portlist =
+	    InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
 	  activeport = 0;
-
 	}
-
       else if (signalactive)
-
 	{
-
-	  signalslist=InsertSignal (signalslist,(char *) $1, lastsignalsize);
-
+	  signalslist =
+	    InsertSignal (signalslist, (char *) $1, lastsignalsize);
 	  signalactive = 0;
-
 	}
       else if (multipledec)
 	{
-
 	  int length, list_pos;
-
 	  length = 0;
-
 	  list_pos = 0;
-
 	  //Look in the enumerated list if it was declared e.j state_t state;
 	  list_pos = findEnumList (enumlistlist, storedtype);
 
 	  if (list_pos > -1)
 	    {
-
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-
-
-	      signalslist=InsertSignal (signalslist,(char *) $1, length);
-
-	      writeslist=InsertWrite (writeslist,(char *) $1);
-
+	      signalslist = InsertSignal (signalslist, (char *) $1, length);
+	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      free (storedtype);
-
 	      multipledec = 0;
-
 	    }
 	  else
 	    {
-
-	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
-
+	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		       (char *) $1);
 	      return (1);
-
 	    }
-
 	}
-
     }
 
 };
-
 
 
 word_colon:
@@ -696,38 +513,25 @@ WORD COLON
 
   if (translate == 1)
     {
-
       if (activeport)
-
 	{
-
-	  portlist=InsertPort (portlist,(char *) $1, lastportkind, lastportsize);
-
+	  portlist =
+	    InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
 	}
-
       else if (signalactive)
-
 	{
-
-	  signalslist=InsertSignal (signalslist,(char *) $1, lastsignalsize);
-
+	  signalslist =
+	    InsertSignal (signalslist, (char *) $1, lastsignalsize);
 	}
-
       else if (reading_enumerates)
-
 	{
-
-	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
-
-
+	  enumerateslist = InsertEnumerates (enumerateslist, (char *) $1);
 	}
       else if (multipledec)
 	{
 
 	  int length, list_pos;
-
 	  length = 0;
-
 	  list_pos = 0;
 
 	  //Look in the enumerated list if it was declared e.j state_t state;
@@ -735,29 +539,19 @@ WORD COLON
 
 	  if (list_pos > -1)
 	    {
-
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-
-
-	      signalslist=InsertSignal (signalslist,(char *) $1, length);
-
-	      writeslist=InsertWrite (writeslist,(char *) $1);
-
+	      signalslist = InsertSignal (signalslist, (char *) $1, length);
+	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      multipledec = 1;
-
 	    }
 	  else
 	    {
-
-	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
-
+	      fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		       (char *) $1);
 	      return (1);
-
 	    }
-
 	}
-
     }
 
 };
@@ -767,24 +561,17 @@ WORD COLON
 word_closekey_word:
 WORD CLOSEKEY WORD SEMICOLON
 {
-
   if (translate == 1)
     {
 
       //Finish enumerate var declaration
       if (reading_enumerates)
-
 	{
-
-	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
-
-	  enumlistlist=InsertEnumList (enumlistlist, enumerateslist, (char *) $4, 0);	//Insert also the variable name
+	  enumerateslist = InsertEnumerates (enumerateslist, (char *) $1);
+	  enumlistlist = InsertEnumList (enumlistlist, enumerateslist, (char *) $4, 0);	//Insert also the variable name
 	  reading_enumerates = 0;
-
 	}
-
     }
-
 };
 
 
@@ -801,9 +588,9 @@ WORD CLOSEKEY SEMICOLON
 
 	{
 
-	  enumerateslist=InsertEnumerates (enumerateslist, (char *) $1);
+	  enumerateslist = InsertEnumerates (enumerateslist, (char *) $1);
 
-	  enumlistlist=InsertEnumList (enumlistlist, enumerateslist, enumname, 1);	//Insert also the variable name
+	  enumlistlist = InsertEnumList (enumlistlist, enumerateslist, enumname, 1);	//Insert also the variable name
 	  reading_enumerates = 0;
 
 	}
@@ -813,19 +600,14 @@ WORD CLOSEKEY SEMICOLON
 };
 
 
-
-
 instantation:
 WORD EQUALS NEW WORD OPENPAR QUOTE WORD QUOTE CLOSEPAR SEMICOLON
 {
-
   if (translate == 1)
     {
-
-      instanceslist=InsertInstance (instanceslist, (char *) $1, (char *) $4);
-
+      instanceslist =
+	InsertInstance (instanceslist, (char *) $1, (char *) $4);
     }
-
 };
 
 
@@ -837,22 +619,28 @@ WORD ARROW WORD OPENPAR WORD CLOSEPAR SEMICOLON
   if (translate == 1)
     {
 
-      if (instanceslist == NULL){
-  	     fprintf (stderr, "line: %d error: no instances found\n",lineno);
-  	  }else{
-      
-	    InstanceNode *ill;
-        SGLIB_LIST_MAP_ON_ELEMENTS (InstanceNode, instanceslist, ill, next,
-        {		
-		    if (strcmp (ill->nameinstance, (char *) $1) == 0){
-               ill->bindslist=InsertBind (ill->bindslist, (char *) $3, (char *) $5);
-			   break;
-			}
-	    }
-		);
-    }
+      if (instanceslist == NULL)
+	{
+	  fprintf (stderr, "line: %d error: no instances found\n", lineno);
+	}
+      else
+	{
 
-   }
+	  InstanceNode *ill;
+	  SGLIB_LIST_MAP_ON_ELEMENTS (InstanceNode, instanceslist, ill, next,
+				      {
+				      if (strcmp
+					  (ill->nameinstance,
+					   (char *) $1) == 0)
+				      {
+				      ill->bindslist =
+				      InsertBind (ill->bindslist, (char *) $3,
+						  (char *) $5); break;}
+				      }
+	  );
+	}
+
+    }
 };
 
 
@@ -916,7 +704,7 @@ ENUM WORD OPENKEY
       //In this case we define type e.g. enum state_t {S0,S1,S2};
       enumerateslist = NULL;
 
-      enumname = (char *)malloc (sizeof (char) * strlen ((char *) $2));
+      enumname = (char *) malloc (sizeof (char) * strlen ((char *) $2));
 
       strcpy (enumname, (char *) $2);
 
@@ -934,9 +722,7 @@ WORD WORD SEMICOLON
 
   if (translate == 1)
     {
-
       int length, list_pos;
-
       length = 0;
 
       list_pos = 0;
@@ -946,27 +732,18 @@ WORD WORD SEMICOLON
 
       if (list_pos > -1)
 	{
-
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
-
-
-	  signalslist=InsertSignal (signalslist,(char *) $2, length);
-
-	  writeslist=InsertWrite (writeslist,(char *) $2);
-
+	  signalslist = InsertSignal (signalslist, (char *) $2, length);
+	  writeslist = InsertWrite (writeslist, (char *) $2);
 	}
       else
 	{
-
-	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
-
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		   (char *) $1);
 	  return (1);
-
 	}
-
     }
-
 };
 
 
@@ -994,15 +771,16 @@ SC_SIGNAL MENOR WORD MAYOR WORD SEMICOLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	  signalslist=InsertSignal (signalslist,(char *) $5, length);
+	  signalslist = InsertSignal (signalslist, (char *) $5, length);
 
-	  writeslist=InsertWrite (writeslist,(char *) $5);	  
+	  writeslist = InsertWrite (writeslist, (char *) $5);
 
 	}
       else
 	{
 
-	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $3);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		   (char *) $3);
 
 	  return (1);
 
@@ -1036,13 +814,13 @@ WORD WORD COLON
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
-	  storedtype = (char *)malloc (sizeof (char) * strlen ((char *) $1));
+	  storedtype = (char *) malloc (sizeof (char) * strlen ((char *) $1));
 
 	  strcpy (storedtype, (char *) $1);
 
-	  signalslist=InsertSignal (signalslist,(char *) $2, length);
+	  signalslist = InsertSignal (signalslist, (char *) $2, length);
 
-	  writeslist=InsertWrite (writeslist,(char *) $2);
+	  writeslist = InsertWrite (writeslist, (char *) $2);
 
 	  multipledec = 1;
 
@@ -1050,7 +828,8 @@ WORD WORD COLON
       else
 	{
 
-	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $1);
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		   (char *) $1);
 
 	  return (1);
 
@@ -1060,12 +839,9 @@ WORD WORD COLON
 
 };
 
-
-
 multiple_sc_signal_declaration:
 SC_SIGNAL MENOR WORD MAYOR WORD COLON
 {
-
   if (translate == 1)
     {
       int length, list_pos;
@@ -1074,35 +850,23 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
 
       //Look in the enumerated list if it was declared e.j state_t state;
       list_pos = findEnumList (enumlistlist, (char *) $3);
-
       if (list_pos > -1)
-  	  {
-
+	{
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
-
-	  storedtype = (char *)malloc (sizeof (char) * strlen ((char *) $3));
-
+	  storedtype = (char *) malloc (sizeof (char) * strlen ((char *) $3));
 	  strcpy (storedtype, (char *) $3);
-
-	  signalslist=InsertSignal (signalslist,(char *) $5, length);
-
-	  writeslist=InsertWrite (writeslist,(char *) $5);
-
+	  signalslist = InsertSignal (signalslist, (char *) $5, length);
+	  writeslist = InsertWrite (writeslist, (char *) $5);
 	  multipledec = 1;
-
 	}
       else
 	{
-
-	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno, (char *) $3);
-
+	  fprintf (stderr, "\nline: %d Type %s unknow\n", lineno,
+		   (char *) $3);
 	  return (1);
-
 	}
-
     }
-
 };
 
 
@@ -1110,11 +874,8 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
 translateoff:
 TRANSLATEOFF
 {
-
   translate = 0;
-
-  fprintf (stderr, "line: %d Found Translate off directive \n",lineno);
-
+  fprintf (stderr, "line: %d Found Translate off directive \n", lineno);
 };
 
 
@@ -1122,9 +883,56 @@ TRANSLATEOFF
 translateon:
 TRANSLATEON
 {
-
   translate = 1;
+  fprintf (stderr, "line: %d Found Translate on directive \n", lineno);
+};
 
-  fprintf (stderr, "line: %d Found Translate on directive \n",lineno);
+function:
+SC_REG MENOR NUMBER MAYOR WORD OPENPAR
+{
+  fprintf (stderr, "line: %d Found Function Declaration \n", lineno);
+  /* New inputs list */
+  functionname = (char *) $5;
+  outputlenght = $3;
+  funcinputslist = NULL;
+};
 
+functioninputs:
+SC_REG MENOR NUMBER MAYOR WORD COLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3);
+};
+
+finishfunctioninputs:
+SC_REG MENOR NUMBER MAYOR WORD CLOSEPAR SEMICOLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3);
+  functionslist =
+    InsertFunction (functionslist, functionname, funcinputslist,
+		    outputlenght);
+};
+
+boolfunction:
+BOOL WORD OPENPAR
+{
+  fprintf (stderr, "line: %d Found Function Declaration \n", lineno);
+  /* New inputs list */
+  functionname = (char *) $2;
+  outputlenght = 1;
+  funcinputslist = NULL;
+};
+
+boolfunctioninputs:
+BOOL WORD COLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2, 1);
+};
+
+boolfinishfunctioninputs:
+BOOL WORD CLOSEPAR SEMICOLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2, 1);
+  functionslist =
+    InsertFunction (functionslist, functionname, funcinputslist,
+		    outputlenght);
 };

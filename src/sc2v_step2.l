@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  *
- *  SystemC to Verilog Translator v0.3
+ *  SystemC to Verilog Translator v0.4
  *  Provided by OpenSoc Design
  *  
  *  www.opensocdesign.com
@@ -57,10 +57,10 @@ sc_signal               if(!includefound & !linecomment & !multilinecomment) ret
 "bool"                  if(!includefound & !linecomment & !multilinecomment) return BOOL;
 "<"                     if(!includefound & !linecomment & !multilinecomment) return MENOR;
 ">"                     if(!includefound & !linecomment & !multilinecomment) return MAYOR;
-sc_int                  if(!includefound & !linecomment & !multilinecomment) return SC_INT;
-sc_uint	                if(!includefound & !linecomment & !multilinecomment) return SC_UINT;
-sc_bigint               if(!includefound & !linecomment & !multilinecomment) return SC_INT;
-sc_biguint              if(!includefound & !linecomment & !multilinecomment) return SC_UINT;
+sc_int                  if(!includefound & !linecomment & !multilinecomment) return SC_REG;
+sc_uint	                if(!includefound & !linecomment & !multilinecomment) return SC_REG;
+sc_bigint               if(!includefound & !linecomment & !multilinecomment) return SC_REG;
+sc_biguint              if(!includefound & !linecomment & !multilinecomment) return SC_REG;
 \(                      if(!includefound & !linecomment & !multilinecomment) return OPENPAR;
 \)                      if(!includefound & !linecomment & !multilinecomment) return CLOSEPAR;
 ;                       if(!includefound & !linecomment & !multilinecomment) return SEMICOLON;

@@ -3,6 +3,13 @@
 #define HOLA 1
 #define CONCAT 1
 
+sc_uint<2> fsm::func1(sc_uint<2> a, sc_uint<2> b){
+   sc_uint<2> c;
+   c=a+b;
+   return c+5;
+}
+
+
 void
 fsm::regs ()
 {
@@ -23,7 +30,7 @@ verilog end*/
 
   sc_uint < 2 > c;
   next_state.write (state.read ());
-  a.write (0);
+  a.write (func1(a.read(),b.read()));
   b.write (HOLA);
 
 #ifdef CONCAT
