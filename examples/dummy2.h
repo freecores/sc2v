@@ -15,6 +15,7 @@ SC_MODULE(fsm){
 
    void regs();
    void fsm_proc();
+   void dummy_proc();
    
    sc_signal<sc_uint<2> > state,next_state;
    sc_signal< sc_uint<32> > array[12];
@@ -28,8 +29,11 @@ SC_MODULE(fsm){
      SC_METHOD(fsm_proc);
      sensitive(state);
      sensitive << input1;
-     sensitive << array[3];
+     sensitive << array;
      sensitive(input2);
+     
+     SC_METHOD(dummy_proc);
+     sensitive << input1;
 	  
  }
 };

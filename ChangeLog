@@ -3,6 +3,7 @@
              Corrected bug in hexadecimal numbers in case statatements
              Corrected bug in type conversions
              Corrected bug in array length
+	     Corrected bug in process without variables declaration
 	          
 15-03-2005   Version 0.4.1
 

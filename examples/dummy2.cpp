@@ -73,3 +73,9 @@ fsm::fsm_proc ()
       break;
     }
 }
+
+void fsm::dummy_proc(){
+
+w.write(sc_uint<1>(2));
+
+}

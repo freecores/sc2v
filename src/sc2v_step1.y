@@ -40,6 +40,8 @@
   int openedkeys = 0;
   int newline = 0;
   int reg_found = 0;
+  int reglenght = 0;
+  int writelenght = 0;
   int array_size=0;
   int integer_found=0;
   int regs_end;
@@ -405,7 +407,8 @@ SC_REG LOWER NUMBER BIGGER
     {
       if (processfound)
 	{
-	  fprintf (regs_file, "reg[%d:0] ", (-1 + $3));
+	  writelenght=1;
+	  reglenght = $3;
 	  reg_found = 1;
 	}
     }
@@ -434,7 +437,8 @@ BOOL
     {
       if (processfound)
 	{
-	  fprintf (regs_file, "reg ");
+  	  writelenght=1;
+	  reglenght=0;
 	  reg_found = 1;
 	}
     }
@@ -468,15 +472,10 @@ NUMBER
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
-	if (reg_found)
-	  {
-	    if (opencorchfound)
-	      fprintf (regs_file, "%d:0", -1 + $1);
-	    else
-	      fprintf (regs_file, "%d", $1);
-	  }
-	else
-	  fprintf (file, "%d", $1);
+       if(opencorchfound && reg_found)
+        fprintf (regs_file, "%d:0",$1-1);
+       else
+	fprintf (file, "%d", $1);
       else if (definefound)
 	fprintf (FILE_DEFINES, "%d", $1);
     }
@@ -542,6 +541,14 @@ WORD
 
 	  if (reg_found)
 	    {
+	      if(writelenght){
+	       writelenght=0;
+  	       if(reglenght==0)
+ 	        fprintf (regs_file, "reg ");
+	       else
+   	        fprintf (regs_file, "reg[%d:0] ", (-1 +reglenght));
+	      }
+	        	
 	      regname =	(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
 	      regname2 = (char *) malloc (sizeof (char) * (strlen ((char *) $1) + strlen (processname)) + 1);
 	      strcpy (regname, (char *) $1);
