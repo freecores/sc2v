@@ -99,7 +99,7 @@
 
     translate = 1;
 
-    fprintf (stderr, "\nSystemC to Verilog Translator v0.3\n\n");
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.4\n\n");
     fprintf (stderr, "Parsing header file.......\n\n");
 
     FILE *yyin = stdin;

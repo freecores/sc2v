@@ -81,7 +81,7 @@
     defineslist = NULL;
     regslist = NULL;
 
-    fprintf (stderr, "\nSystemC to Verilog Translator v0.3");
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.4");
     fprintf (stderr,
 	     "\nProvided by OpenSoc http://www.opensocdesign.com\n\n");
     fprintf (stderr, "Parsing implementation file.......\n\n");
