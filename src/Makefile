@@ -37,4 +37,4 @@ all:
 
 clean:
 
-	rm -rf lex.* y.* *.o ../bin/sc2v_step2* ../bin/sc2v_step1*
+	rm -rf lex.* y.* *.o ../bin/sc2v_step2* ../bin/sc2v_step1* ../bin/sc2v_step3*
