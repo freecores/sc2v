@@ -33,9 +33,7 @@ verilog end*/
   next_state.write (state.read ());
   a.write (func1(a.read(),b.read()));
   b.write (HOLA);
-
-  f.write((0,input2.read()));
-  
+ 
 #ifdef CONCAT
   c.write ((a.range (1, 0), b.range (1, 0)));
 #else
