@@ -127,7 +127,7 @@
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
 %token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR MINEQ
 %token VOID TTRUE TFALSE ENDFUNC INC DEC INTEGER EQUALS
-%token PIFDEF PENDDEF PELSE 
+%token PIFDEF PIFNDEF PENDDEF PELSE 
 
 %% commands:	/* empty */
 |commands command;
@@ -221,6 +221,8 @@ endfunc
   verilogend 
   | 
   ifdef 
+  |
+  ifndef
   | 
   endif 
   | 
@@ -1282,6 +1284,26 @@ PIFDEF
     }
   else if (verilog == 1)
     fprintf (file, "#ifdef");
+};
+
+ifndef:
+PIFNDEF
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  ifdeffound = 1;
+	  fprintf (file, "`ifndef");
+	}
+      else if (definefound)
+	{
+	  fprintf (FILE_DEFINES, "`ifndef");
+	}
+    }
+  else if (verilog == 1)
+    fprintf (file, "#ifndef");
 };
 
 endif:

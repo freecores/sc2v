@@ -202,6 +202,12 @@ module
   |
   inst_decl
   |
+  multiple_inst_decl
+  |
+  multiple_inst_decl_cont
+  |
+  multiple_inst_decl_end
+  |
   closekey_semicolon
   |
   enumerates
@@ -677,9 +683,9 @@ SC_CTOR OPENPAR WORD CLOSEPAR OPENKEY
 };
 
 
-void:VOID WORD OPENPAR CLOSEPAR SEMICOLON
+void:
+VOID WORD OPENPAR CLOSEPAR SEMICOLON
 {
-
 
 };
 
@@ -687,13 +693,30 @@ void:VOID WORD OPENPAR CLOSEPAR SEMICOLON
 inst_decl:
 WORD ASTERISCO WORD SEMICOLON
 {
+/*Ignore*/
 
+};
+multiple_inst_decl:
+WORD ASTERISCO WORD COLON
+{
+/*Ignore*/
+
+};
+multiple_inst_decl_cont:
+ASTERISCO WORD COLON
+{
+/*Ignore*/
+
+};
+multiple_inst_decl_end:
+ASTERISCO WORD SEMICOLON
+{
+/*Ignore*/
 
 };
 
-
-
-closekey_semicolon:CLOSEKEY SEMICOLON
+closekey_semicolon:
+CLOSEKEY SEMICOLON
 {
 
 

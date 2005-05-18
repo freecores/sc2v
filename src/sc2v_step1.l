@@ -85,6 +85,7 @@ bool                                if(!includefound & !linecomment & !multiline
 "#define"                           if(!includefound & !linecomment & !multilinecomment) return DEFINE; else {yylval=(int)strdup(yytext);} return WORD;
 "#include"                          includefound = 1;
 "#ifdef"                            if(!includefound & !linecomment & !multilinecomment) return PIFDEF; else {yylval=(int)strdup(yytext);} return WORD;
+"#ifndef"                           if(!includefound & !linecomment & !multilinecomment) return PIFNDEF; else {yylval=(int)strdup(yytext);} return WORD;
 "#else"                             if(!includefound & !linecomment & !multilinecomment) return PELSE; else {yylval=(int)strdup(yytext);} return WORD;
 "#endif"                            if(!includefound & !linecomment & !multilinecomment) return PENDDEF; else {yylval=(int)strdup(yytext);} return WORD;
 "//"                    if (!multilinecomment) linecomment = 1; yylval=(int)strdup(yytext); return WORD;

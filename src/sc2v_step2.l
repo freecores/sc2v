@@ -101,6 +101,9 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 "@"
 "|"
 "~"
+"_"
+"?"
+"¿"
 
 "("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
 "("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
