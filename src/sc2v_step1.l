@@ -38,59 +38,59 @@ int multilinecomment = 0;
 %}
 
 %%
-"void"                              if(!includefound & !linecomment & !multilinecomment) return VOID; else {yylval=(int)strdup(yytext);} return WORD;
-"true"                              if(!includefound & !linecomment & !multilinecomment) return TTRUE; else {yylval=(int)strdup(yytext);} return WORD;
-"false"                             if(!includefound & !linecomment & !multilinecomment) return TFALSE; else {yylval=(int)strdup(yytext);} return WORD;
+"void"                              if(!includefound & !linecomment & !multilinecomment) return VOID; else {yylval=(int)strdup(yytext);} return COMMENT;
+"true"                              if(!includefound & !linecomment & !multilinecomment) return TTRUE; else {yylval=(int)strdup(yytext);} return COMMENT;
+"false"                             if(!includefound & !linecomment & !multilinecomment) return TFALSE; else {yylval=(int)strdup(yytext);} return COMMENT;
 [0-9]+                              yylval=atoi(yytext); return NUMBER;
-"::"                                if(!includefound & !linecomment & !multilinecomment) return TWODOUBLEPOINTS; else {yylval=(int)strdup(yytext);} return WORD;
-"int"                               if(!includefound & !linecomment & !multilinecomment) return INTEGER; else {yylval=(int)strdup(yytext);} return WORD;
-sc_int                              if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
-sc_uint                             if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
-sc_bigint                           if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
-sc_biguint                          if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return WORD;
-bool                                if(!includefound & !linecomment & !multilinecomment) return BOOL; else {yylval=(int)strdup(yytext);} return WORD;
-">"                                 if(!includefound & !linecomment & !multilinecomment) return BIGGER; else {yylval=(int)strdup(yytext);} return WORD;
-"<"                                 if(!includefound & !linecomment & !multilinecomment) return LOWER; else {yylval=(int)strdup(yytext);} return WORD;
-"{"                                 if(!includefound & !linecomment & !multilinecomment) return OPENKEY; else {yylval=(int)strdup(yytext);} return WORD;
-"}"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSEKEY; else {yylval=(int)strdup(yytext);} return WORD;
-"("                                 if(!includefound & !linecomment & !multilinecomment) return OPENPAR; else {yylval=(int)strdup(yytext);} return WORD;
-")"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSEPAR; else {yylval=(int)strdup(yytext);} return WORD;
-"["                                 if(!includefound & !linecomment & !multilinecomment) return OPENCORCH; else {yylval=(int)strdup(yytext);} return WORD;
-"]"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSECORCH; else {yylval=(int)strdup(yytext);} return WORD;
-"return"                            if(!includefound & !linecomment & !multilinecomment) return ENDFUNC; else {yylval=(int)strdup(yytext);} return WORD;
-".write"                            if(!includefound & !linecomment & !multilinecomment) return WRITE; else {yylval=(int)strdup(yytext);} return WORD;
-"switch"                            if(!includefound & !linecomment & !multilinecomment) return SWITCH; else {yylval=(int)strdup(yytext);} return WORD;
-"case"                              if(!includefound & !linecomment & !multilinecomment) return CASE; else {yylval=(int)strdup(yytext);} return WORD;
-"default"                           if(!includefound & !linecomment & !multilinecomment) return DEFAULT; else {yylval=(int)strdup(yytext);} return WORD;
-"break"                             if(!includefound & !linecomment & !multilinecomment) return BREAK; else {yylval=(int)strdup(yytext);} return WORD;
-".read"                             if(!includefound & !linecomment & !multilinecomment) return READ; else {yylval=(int)strdup(yytext);} return WORD;
-".range"                            if(!includefound & !linecomment & !multilinecomment) return RANGE; else {yylval=(int)strdup(yytext);} return WORD;
-[a-zA-Z][_a-zA-Z0-9]*               yylval=(int)strdup(yytext); return WORD;
-[.:"^"!%()/+*_"&""?""|""\\"]        yylval=(int)strdup(yytext); return SYMBOL;
-"<="                                yylval=(int)strdup(yytext); return MINEQ;
-"="                                 yylval=(int)strdup(yytext); return EQUALS;
-"++"                                yylval=(int)strdup(yytext); return INC;
-"--"                                yylval=(int)strdup(yytext); return DEC;
-"-"                                 yylval=(int)strdup(yytext); return SYMBOL;
-"~"                                 yylval=(int)strdup(yytext); return SYMBOL;
-"@"                                 yylval=(int)strdup(yytext); return SYMBOL;
-","                                 if(!includefound & !linecomment & !multilinecomment) return COLON; else {yylval=(int)strdup(yytext);} return WORD;
-";"                                 if(!includefound & !linecomment & !multilinecomment) return SEMICOLON; else {yylval=(int)strdup(yytext);} return WORD;
+"::"                                if(!includefound & !linecomment & !multilinecomment) return TWODOUBLEPOINTS; else {yylval=(int)strdup(yytext);} return COMMENT;
+"int"                               if(!includefound & !linecomment & !multilinecomment) return INTEGER; else {yylval=(int)strdup(yytext);} return COMMENT;
+sc_int                              if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return COMMENT;
+sc_uint                             if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return COMMENT;
+sc_bigint                           if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return COMMENT;
+sc_biguint                          if(!includefound & !linecomment & !multilinecomment) return SC_REG; else {yylval=(int)strdup(yytext);} return COMMENT;
+bool                                if(!includefound & !linecomment & !multilinecomment) return BOOL; else {yylval=(int)strdup(yytext);} return COMMENT;
+">"                                 if(!includefound & !linecomment & !multilinecomment) return BIGGER; else {yylval=(int)strdup(yytext);} return COMMENT;
+"<"                                 if(!includefound & !linecomment & !multilinecomment) return LOWER; else {yylval=(int)strdup(yytext);} return COMMENT;
+"{"                                 if(!includefound & !linecomment & !multilinecomment) return OPENKEY; else {yylval=(int)strdup(yytext);} return COMMENT;
+"}"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSEKEY; else {yylval=(int)strdup(yytext);} return COMMENT;
+"("                                 if(!includefound & !linecomment & !multilinecomment) return OPENPAR; else {yylval=(int)strdup(yytext);} return COMMENT;
+")"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSEPAR; else {yylval=(int)strdup(yytext);} return COMMENT;
+"["                                 if(!includefound & !linecomment & !multilinecomment) return OPENCORCH; else {yylval=(int)strdup(yytext);} return COMMENT;
+"]"                                 if(!includefound & !linecomment & !multilinecomment) return CLOSECORCH; else {yylval=(int)strdup(yytext);} return COMMENT;
+"return"                            if(!includefound & !linecomment & !multilinecomment) return ENDFUNC; else {yylval=(int)strdup(yytext);} return COMMENT;
+".write"                            if(!includefound & !linecomment & !multilinecomment) return WRITE; else {yylval=(int)strdup(yytext);} return COMMENT;
+"switch"                            if(!includefound & !linecomment & !multilinecomment) return SWITCH; else {yylval=(int)strdup(yytext);} return COMMENT;
+"case"                              if(!includefound & !linecomment & !multilinecomment) return CASE; else {yylval=(int)strdup(yytext);} return COMMENT;
+"default"                           if(!includefound & !linecomment & !multilinecomment) return DEFAULT; else {yylval=(int)strdup(yytext);} return COMMENT;
+"break"                             if(!includefound & !linecomment & !multilinecomment) return BREAK; else {yylval=(int)strdup(yytext);} return COMMENT;
+".read"                             if(!includefound & !linecomment & !multilinecomment) return READ; else {yylval=(int)strdup(yytext);} return COMMENT;
+".range"                            if(!includefound & !linecomment & !multilinecomment) return RANGE; else {yylval=(int)strdup(yytext);} return COMMENT;
+[a-zA-Z][_a-zA-Z0-9]*               yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return WORD; else return COMMENT;
+[.:^!%/+*_"&""?""|""\\"]           yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return SYMBOL; else return COMMENT;
+"<="                                yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return MINEQ; else return COMMENT;
+"="                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return EQUALS; else  return COMMENT;
+"++"                                yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return INC; else return COMMENT;
+"--"                                yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return DEC; else  return COMMENT;
+"-"                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return SYMBOL; else  return COMMENT;
+"~"                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return SYMBOL; else  return COMMENT;
+"@"                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return SYMBOL; else  return COMMENT;
+","                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return COLON; else  return COMMENT;
+";"                                 yylval=(int)strdup(yytext); if(!includefound & !linecomment & !multilinecomment) return SEMICOLON; else  return COMMENT;
 [" "]+                              /*Ignore white spaces*/
 "\t"                                return TAB; /*Ignore Tab*/
 "\n"                                lineno++; if (linecomment) linecomment=0; else if(includefound) includefound=0; return NEWLINE;
 "\\\n"                              lineno++; /* no new line */ 
-"0x"                                if(!includefound & !linecomment & !multilinecomment) return HEXA; else {yylval=(int)strdup(yytext);} return WORD;
-"$"                                 if(!includefound & !linecomment & !multilinecomment) return DOLLAR; else {yylval=(int)strdup(yytext);} return WORD;/* Ignore if(!includefound & !linecomment & !multilinecomment) $ */
-"#define"                           if(!includefound & !linecomment & !multilinecomment) return DEFINE; else {yylval=(int)strdup(yytext);} return WORD;
+"0x"                                if(!includefound & !linecomment & !multilinecomment) return HEXA; else {yylval=(int)strdup(yytext);} return COMMENT;
+"$"                                 if(!includefound & !linecomment & !multilinecomment) return DOLLAR; else {yylval=(int)strdup(yytext);} return COMMENT;/* Ignore if(!includefound & !linecomment & !multilinecomment) $ */
+"#define"                           if(!includefound & !linecomment & !multilinecomment) return DEFINE; else {yylval=(int)strdup(yytext);} return COMMENT;
 "#include"                          includefound = 1;
-"#ifdef"                            if(!includefound & !linecomment & !multilinecomment) return PIFDEF; else {yylval=(int)strdup(yytext);} return WORD;
-"#ifndef"                           if(!includefound & !linecomment & !multilinecomment) return PIFNDEF; else {yylval=(int)strdup(yytext);} return WORD;
-"#else"                             if(!includefound & !linecomment & !multilinecomment) return PELSE; else {yylval=(int)strdup(yytext);} return WORD;
-"#endif"                            if(!includefound & !linecomment & !multilinecomment) return PENDDEF; else {yylval=(int)strdup(yytext);} return WORD;
-"//"                    if (!multilinecomment) linecomment = 1; yylval=(int)strdup(yytext); return WORD;
-"/*"                    if (!linecomment) multilinecomment = 1; yylval=(int)strdup(yytext); return WORD;
-"*/"                    if (multilinecomment) multilinecomment = 0; yylval=(int)strdup(yytext); return WORD;
+"#ifdef"                            if(!includefound & !linecomment & !multilinecomment) return PIFDEF; else {yylval=(int)strdup(yytext);} return COMMENT;
+"#ifndef"                           if(!includefound & !linecomment & !multilinecomment) return PIFNDEF; else {yylval=(int)strdup(yytext);} return COMMENT;
+"#else"                             if(!includefound & !linecomment & !multilinecomment) return PELSE; else {yylval=(int)strdup(yytext);} return COMMENT;
+"#endif"                            if(!includefound & !linecomment & !multilinecomment) return PENDDEF; else {yylval=(int)strdup(yytext);} return COMMENT;
+"//"                                if (!multilinecomment) linecomment = 1; yylval=(int)strdup(yytext); return COMMENT;
+"/*"                                if (!linecomment) multilinecomment = 1; yylval=(int)strdup(yytext); return COMMENT;
+"*/"                                if (multilinecomment) multilinecomment = 0; yylval=(int)strdup(yytext); return COMMENT;
 
 "("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
 "("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"

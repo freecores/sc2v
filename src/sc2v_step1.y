@@ -58,8 +58,8 @@
   int defineinvocationfound = 0;
   int opencorchfound = 0;
   int defineparenthesis = 0;
-
   int openedcase = 0;
+  int writingvar=0;
 
   int default_break_found = 0;
   int default_found;
@@ -127,7 +127,7 @@
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
 %token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR MINEQ
 %token VOID TTRUE TFALSE ENDFUNC INC DEC INTEGER EQUALS
-%token PIFDEF PIFNDEF PENDDEF PELSE 
+%token PIFDEF PIFNDEF PENDDEF PELSE COMMENT
 
 %% commands:	/* empty */
 |commands command;
@@ -238,7 +238,9 @@ endfunc
   |
   equal
   |
-  minorequal;
+  minorequal
+  |
+  comment;
 
 minorequal:
 MINEQ
@@ -524,6 +526,10 @@ WORD
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
+	  if(opencorchfound==0){
+		strcpy (lastword, (char *) $1);
+	  }
+	
       if (processfound)
 	{
 	  if(lastswitch){
@@ -539,9 +545,7 @@ WORD
 	      openedcase=0;
 	    }
 
-	  strcpy (lastword, (char *) $1);
-
-	  if (reg_found)
+		if (reg_found)
 	    {
 	      if(writelenght){
 	       writelenght=0;
@@ -662,8 +666,9 @@ EQUALS
   reg_found=0;
   if (translate == 1 && verilog == 0)
   {
-      if (processfound)
+   if (processfound)
 	fprintf (file, "=");
+	writingvar=1;
   }
   else if (definefound)
     fprintf (FILE_DEFINES, "=");
@@ -700,6 +705,7 @@ newline:
 NEWLINE
 {
   defineparenthesis = 0;
+  writingvar=0;
   if (translate == 1 && verilog == 0)
     {
       if (processfound & !reg_found & !openedcase)
@@ -756,8 +762,8 @@ SEMICOLON
 	    }
 	  else
 	    {
-	      if (defineinvocationfound == 0)
-		fprintf (file, ";");
+	    if (defineinvocationfound == 0 || writingvar)
+		  fprintf (file, ";");
 	    }
 	}
       else if (definefound)
@@ -767,7 +773,8 @@ SEMICOLON
     }
   else if (verilog == 1)
     fprintf (file, ";");
-
+  
+  writingvar=0;
   defineinvocationfound = 0;
 };
 
@@ -829,10 +836,10 @@ OPENCORCH
     {
       if (processfound)
 	{
+	  opencorchfound = 1;
 	  if (reg_found)
 	    {
 	      fprintf (regs_file, "[");
-	      opencorchfound = 1;
 	    }
 	  else
 	    fprintf (file, "[");
@@ -854,11 +861,11 @@ CLOSECORCH
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
-	{
+	  { 
+	  opencorchfound = 0;
 	  if (reg_found)
 	    {
 	      fprintf (regs_file, "]");
-	      opencorchfound = 0;
 	    }
 	  else
 	    fprintf (file, "]");
@@ -1146,11 +1153,17 @@ CASE WORD SYMBOL
 	 if (!openedcase)
 	  for (i = 0; i < openedkeys; i++)
 	    fprintf (file, "   ");
-	  if (openedcase)
-	    fprintf (file, ", %s", (char *) $2);
-	  else
-	    fprintf (file, "%s", (char *) $2);
-
+	  if (openedcase){
+	    if (IsDefine (defineslist, (char *) $2))
+	      fprintf (file, ", `%s", (char *) $2);
+		else
+		  fprintf (file, ", %s", (char *) $2);
+	  }else{
+	    if (IsDefine (defineslist, (char *) $2))
+	      fprintf (file, "`%s", (char *) $2);
+		else
+		  fprintf (file, "%s", (char *) $2);
+      }
 	  newline = 1;
 	  openedcase = 1;
 
@@ -1374,3 +1387,27 @@ TFALSE
   else if (verilog == 1)
     fprintf (file, "0");
 };
+ 
+comment:
+COMMENT
+{
+if(processfound){
+  //To manage comments inside switch statements
+  if(lastswitch){
+	openedcase=0;
+  }else if (openedcase){
+	fprintf (file, " :\n");
+      for (i = 0; i < openedkeys; i++)
+		fprintf (file, "   ");
+        fprintf(file,"begin\n");
+        openedcase=0;
+  }
+  //indent
+  if(newline){
+    for (i = 0; i < openedkeys; i++)
+	  fprintf (file, "   ");
+	newline=0;
+  }
+  fprintf (file, " %s", (char *)$1);
+ }
+}

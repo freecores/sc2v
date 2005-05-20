@@ -95,15 +95,8 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 "//"                    if (!multilinecomment) linecomment = 1; 
 "/*"                    if (!linecomment) multilinecomment = 1;
 "*/"                    if (multilinecomment) multilinecomment = 0;
-"/"                     /* ignore */
 "-"
-"#"                   
-"@"
-"|"
-"~"
-"_"
-"?"
-"¿"
+[.:~@#^!%/+*_"&""?""|""\\"]
 
 "("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
 "("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"

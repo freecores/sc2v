@@ -1,23 +1,31 @@
+20-05-2005   Version 0.4.4
+
+             Fix bug using comments with -- and ++ operators
+             Fix bug inferring regs with arrays 
+	     Fix bug when using defines inside case statements
+             Fix bug using comments
+	     Fix bug when assigning defines to variables	   
+
 18-05-2005   Version 0.4.3
 
-             Corrected bug using ? and _ in header file
-             Corrected bug using multiple pointer declarations in header file
+             Fix bug using ? and _ in header file
+             Fix bug using multiple pointer declarations in header file
              Added #ifndef to implementation file
 
 18-03-2005   Version 0.4.2
 
-             Corrected bug in hexadecimal numbers in case statatements
-             Corrected bug in type conversions
-             Corrected bug in array length
-	     Corrected bug in process without variables declaration
+             Fix bug in hexadecimal numbers in case statatements
+             Fix bug in type conversions
+             Fix bug in array length
+	     Fix bug in process without variables declaration
 	          
 15-03-2005   Version 0.4.1
 
-             Corrected bug with <= comparation
+             Fix bug with <= comparation
              for loops with int type as index supported
              Support hex numbers in switchs 
 	     Support sc_signals arrays
-             Corrected bug when connecting a output port to another
+             Fix bug when connecting a output port to another
              Solved problem in type conversions
              Solved problem with enumeration list
 	     Solved bug in nested switch statements
@@ -30,7 +38,7 @@
 
              Contribution of Harald Devos:
                 Line number in syntax error
-                ShowSignalsList arguments corrected                  
+                ShowSignalsList arguments Fix                  
 
 03-02-2005   Version 0.3
 
@@ -47,24 +55,24 @@
 23-01-2005   Version 0.2.4
 
              Contribution of Harald Devos:
-                Corrected Memory allocation problems
-                Corrected return -1 in list.c                  
+                Fix Memory allocation problems
+                Fix return -1 in list.c                  
 
 20-01-2005   Version 0.2.3
 
-             Corrected Memory allocation problems
+             Fix Memory allocation problems
              Ignore SystemC type conversions
 
 18-01-2005   Version 0.2.2
 
              Contribution of Harald Devos:
-                Corrected bug when using keywords in comments
+                Fix bug when using keywords in comments
                 Adding multilines with \
                   
 
 17-01-2005   Version 0.2.1
           
-	     Corrected bug in else if
+	     Fix bug in else if
              Translate true and false into 1 and 0
 
 
