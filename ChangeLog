@@ -1,3 +1,9 @@
+20-07-2005   Version 0.4.5
+
+             Fix bug in functions parameters
+             Update sglib.h library
+
+
 20-05-2005   Version 0.4.4
 
              Fix bug using comments with -- and ++ operators

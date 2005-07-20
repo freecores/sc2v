@@ -121,6 +121,7 @@ ShowPortList (PortNode * list)
 {
 
   PortNode *pll;
+  
   SGLIB_LIST_MAP_ON_ELEMENTS (PortNode, list, pll, next,
   {
 	printf ("%s ", pll->tipo);
@@ -155,10 +156,10 @@ RegOutputs (PortNode * list, InstanceNode *instances)
 }
 
 void
-EnumeratePorts (PortNode * list)
+EnumeratePorts (PortNode *list)
 {
   PortNode *pll;
-
+    
   SGLIB_LIST_MAP_ON_ELEMENTS (PortNode, list, pll, next,
   {
 	if (pll->next == NULL)
@@ -588,13 +589,15 @@ FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, in
 void ShowFunctionInputs (FunctionInputNode * list){
 
   FunctionInputNode *fll;
-    	
+
+  SGLIB_LIST_REVERSE(FunctionInputNode,list, next);
+  
   SGLIB_LIST_MAP_ON_ELEMENTS (FunctionInputNode,list, fll,next,
   {
-	if(fll->lenght!=1)
+    if(fll->lenght!=1)
      printf("input [%d:0] %s;\n",(fll->lenght)-1,fll->name); 
     else
-	 printf("input %s;\n",fll->name); 
+     printf("input %s;\n",fll->name); 
   });
 }
 
