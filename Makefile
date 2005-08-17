@@ -18,7 +18,7 @@ all:
 
 test: 
 	cd src; make all
-	cd examples; ../bin/sc2v.sh subbytes;../bin/sc2v.sh sc_ex1; ../bin/sc2v.sh sp_512x32; ../bin/sc2v.sh dummy1; ../bin/sc2v.sh dummy2 ;../bin/sc2v.sh delay_line; ../bin/sc2v.sh stmach_k;../bin/sc2v.sh rng; ../bin/sc2v.sh md5; ../bin/sc2v.sh half_adder; ../bin/sc2v.sh full_adder; echo ""; echo "sc2v translated the following files successfully"; echo ""; ls -l *.v 
+	cd examples; ../bin/sc2v.sh subbytes;../bin/sc2v.sh sc_ex1; ../bin/sc2v.sh dummy1; ../bin/sc2v.sh dummy2 ;../bin/sc2v.sh delay_line; ../bin/sc2v.sh stmach_k;../bin/sc2v.sh rng; ../bin/sc2v.sh md5; ../bin/sc2v.sh half_adder; ../bin/sc2v.sh full_adder; echo ""; echo "sc2v translated the following files successfully"; echo ""; ls -l *.v 
 
 docs:
 	cd src; doxygen doxygen.cfg 
