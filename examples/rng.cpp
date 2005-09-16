@@ -9,12 +9,8 @@
 ////                                                              ////
 ////  To Do:                                                      ////
 ////   - nothing                                                  ////
-////                                                              ////
 ////  Author(s):                                                  ////
 ////      - Javier Castillo, jcastilo@opencores.org               ////
-////                                                              ////
-////  This core is provided by OpenSoc                            ////
-////  http://www.opensocdesign.com                                ////
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 ////                                                              ////
@@ -46,6 +42,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.1.1.1  2004/10/08 14:04:10  jcastillo
+// First import
+//
 // Revision 1.2  2004/08/30 17:01:50  jcastillo
 // Used indent command
 //

@@ -16,12 +16,12 @@
 
   Authors:
  
-            Pablo Huerta (phuerta@opensocdesign.com)
-            Javier Castillo (jcastillo@opensocdesign.com)
+            Pablo Huerta (pablo.huerta@urjc.es)
+            Javier Castillo (javier.castillo@urjc.es)
  
   Contributors:
 
-             David Moloney
+         David Moloney
 	     Harald Devos
 
 
@@ -63,9 +63,6 @@ To translate use sc2v.sh script in the /bin directory just writting sc2v.sh modu
 		
 5- For testing the application we recommend to use the systemcdes,systecaes and
 systemcmd5 cores, available at www.opencores.org.
-
-6- For any doubt, comment, or for reporting bugs, feel free to write to
-sc2v@opensocdesign.com
 
 
 TODO:

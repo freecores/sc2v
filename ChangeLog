@@ -8,9 +8,9 @@
 
              Fix bug using comments with -- and ++ operators
              Fix bug inferring regs with arrays 
-	     Fix bug when using defines inside case statements
+             Fix bug when using defines inside case statements
              Fix bug using comments
-	     Fix bug when assigning defines to variables	   
+             Fix bug when assigning defines to variables	   
 
 18-05-2005   Version 0.4.3
 
@@ -23,18 +23,18 @@
              Fix bug in hexadecimal numbers in case statatements
              Fix bug in type conversions
              Fix bug in array length
-	     Fix bug in process without variables declaration
+             Fix bug in process without variables declaration
 	          
 15-03-2005   Version 0.4.1
 
              Fix bug with <= comparation
              for loops with int type as index supported
              Support hex numbers in switchs 
-	     Support sc_signals arrays
+			 Support sc_signals arrays
              Fix bug when connecting a output port to another
              Solved problem in type conversions
              Solved problem with enumeration list
-	     Solved bug in nested switch statements
+             Solved bug in nested switch statements
 
 25-02-2005   Version 0.4
 

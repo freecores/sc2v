@@ -1,9 +1,7 @@
 /* -----------------------------------------------------------------------------
  *
  *  SystemC to Verilog Translator v0.4
- *  Provided by OpenSoc Design
- *  
- *  www.opensocdesign.com
+ *  Provided by Universidad Rey Juan Carlos
  *
  * -----------------------------------------------------------------------------
  *  This program is free software; you can redistribute it and/or modify
