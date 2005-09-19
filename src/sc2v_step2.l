@@ -94,7 +94,7 @@ sc_biguint              if(!includefound & !linecomment & !multilinecomment) ret
 "/*"                    if (!linecomment) multilinecomment = 1;
 "*/"                    if (multilinecomment) multilinecomment = 0;
 "-"
-[.:~@#^!%/+*_"&""?""|""\\"]
+[.:~@#^!%/+'*_"&""?""|""\\"]
 
 "("[ ]*"sc_uint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"
 "("[ ]*"sc_biguint"[ ]*"<"[ ]*[0-9]+[ ]*">"[ ]*")"

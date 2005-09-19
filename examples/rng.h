@@ -43,6 +43,9 @@
 // CVS Revision History
 //
 // $Log: not supported by cvs2svn $
+// Revision 1.2  2005/09/16 00:30:33  jcastillo
+// no message
+//
 // Revision 1.1.1.1  2004/10/08 14:04:10  jcastillo
 // First import
 //
@@ -68,10 +71,6 @@ SC_MODULE (rng)
   sc_signal < sc_uint < 43 > >LFSR_reg;
   sc_signal < sc_uint < 37 > >CASR_reg;
 
-  void CASR ();
-  void LFSR ();
-  void combinate ();
-
   SC_CTOR (rng)
   {
 
@@ -87,5 +86,9 @@ SC_MODULE (rng)
     sensitive_pos << clk;
     sensitive_neg << reset;
 
-  }
+  };
+  void CASR ();
+  void LFSR ();
+  void combinate ();
+
 };

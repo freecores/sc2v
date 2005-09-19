@@ -1,3 +1,9 @@
+19-09-2005   Version 0.4.6
+
+             Fix bug when closing method with };
+             Ignore quotes in comments
+
+
 20-07-2005   Version 0.4.5
 
              Fix bug in functions parameters
@@ -30,7 +36,7 @@
              Fix bug with <= comparation
              for loops with int type as index supported
              Support hex numbers in switchs 
-			 Support sc_signals arrays
+             Support sc_signals arrays
              Fix bug when connecting a output port to another
              Solved problem in type conversions
              Solved problem with enumeration list

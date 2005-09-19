@@ -467,7 +467,7 @@ CLOSEKEY
 	{
 	  method_found = 0;
 	  processlist =
-	    InsertProcess (processlist, active_method, sensibilitylist,
+	  InsertProcess (processlist, active_method, sensibilitylist,
 			   active_method_type);
 	}
     }
@@ -716,8 +716,16 @@ ASTERISCO WORD SEMICOLON
 closekey_semicolon:
 CLOSEKEY SEMICOLON
 {
-
-
+ if (translate == 1)
+    {
+      if (method_found)
+	{
+	  method_found = 0;
+	  processlist =
+	  InsertProcess (processlist, active_method, sensibilitylist,
+			   active_method_type);
+	}
+    }
 };
 
 
