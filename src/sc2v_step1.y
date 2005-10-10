@@ -23,7 +23,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
-
+#include "sglib.h"
 #include "sc2v_step1.h"
 
   int lineno = 1;
@@ -62,6 +62,11 @@
   int default_break_found = 0;
   int default_found;
 
+  int struct_found=0;
+  int end_struct=0;
+  int ignore_semicolon=0;
+  char *structname;
+
 //Directives variables
   int translate;
   int verilog;
@@ -83,10 +88,12 @@
 
     defineslist = NULL;
     regslist = NULL;
+    structslist = NULL;
+    structsreglist = NULL;
 
     fprintf (stderr, "\nSystemC to Verilog Translator v0.4");
     fprintf (stderr,
-	     "\nProvided by OpenSoc http://www.opensocdesign.com\n\n");
+	     "\nProvided by URJC(Universidad Rey Juan Carlos)\nhttp://www.escet.urjc.es/~jmartine\n\n");
     fprintf (stderr, "Parsing implementation file.......\n\n");
 
     processname = (char *) malloc (256 * sizeof (char));
@@ -102,6 +109,7 @@
     FILE_WRITES = fopen (file_writes, (char *) "w");
 
     lastword = (char *) malloc (sizeof (char) * 256);
+    structname = (char *) malloc (sizeof (char) * 256);
 
     for (i = 0; i < 256; i++)
       switchparenthesis[i] = 0;
@@ -125,14 +133,15 @@
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
 %token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR MINEQ
 %token VOID TTRUE TFALSE ENDFUNC INC DEC INTEGER EQUALS
-%token PIFDEF PIFNDEF PENDDEF PELSE COMMENT
+%token PIFDEF PIFNDEF PENDDEF PELSE COMMENT STRUCT DOT
 
 %% commands:	/* empty */
 |commands command;
 
-
 command:
-endfunc
+  struct_dec
+  |
+  endfunc
   |
   voidword
   |
@@ -238,7 +247,34 @@ endfunc
   |
   minorequal
   |
-  comment;
+  comment
+  |
+  struct_access
+  ;
+ 
+struct_access:
+WORD DOT WORD
+{
+/*Struct access
+ Check if it is a var acess or a reg*/
+ if (newline){
+   for (i = 0; i < openedkeys; i++)
+      fprintf (file, "   ");
+ }
+ strcpy(structname,(char *)$3);
+ strcat(structname,(char *)$1);   	     
+ regname2 = IsReg (regslist, structname);
+ if (regname2 == NULL)
+  fprintf (file, "%s ", structname);
+ else
+  fprintf (file, "%s", regname2);
+
+  newline = 0;
+
+ free(regname2);	  
+
+ printf("Access to struct %s.%s\n",(char *)$1,(char *)$3);
+}
 
 minorequal:
 MINEQ
@@ -532,8 +568,7 @@ WORD
 	{
 	  if(lastswitch){
 	    openedcase=0;
-	  }else if (openedcase)
-	    {
+	  }else if (openedcase){
 	      fprintf (file, " :\n");
 
 	      for (i = 0; i < openedkeys; i++)
@@ -541,10 +576,44 @@ WORD
 
               fprintf(file,"begin\n");
 	      openedcase=0;
-	    }
+	  }
+          if (end_struct){
+             end_struct=0;
+	     struct_found=0;
+	     ignore_semicolon=1;
+             structslist=InsertStruct(structslist,(char *)$1,structsreglist);
 
-		if (reg_found)
-	    {
+             //ShowStructs(structslist);
+
+             /*Now we should convert all the elements of the struct into regs*/
+             StructRegNode *srll;
+ 	     SGLIB_LIST_MAP_ON_ELEMENTS (StructRegNode,structsreglist, srll,next,
+	     {
+               if(srll->length==0)
+  	         fprintf (regs_file, "reg ");
+	       else
+   	         fprintf (regs_file, "reg[%d:0] ", (-1 +srll->length));
+                 
+               regname =(char *) malloc (sizeof (char) * (strlen (srll->name) + 1));
+               regname2 = (char *) malloc (sizeof (char) * (strlen (srll->name) + strlen (processname)+strlen((char *)$1)) + 1);
+	       strcpy (regname, srll->name);
+	       strcpy (regname2, srll->name);
+	       strcat (regname, (char *)$1);
+               strcat (regname2, (char *)$1);
+               strcat (regname2, processname);
+               fprintf (regs_file, "%s;\n", regname2); /*By the moment no arrays inside the struct supported*/
+	     
+ 	       regslist = InsertReg (regslist, regname, regname2);
+  	       free (regname);
+	       free (regname2);
+               structsreglist=NULL;
+	       reg_found=0; /*To avoid arrays in sructs the interpretation finish here*/
+             );}
+
+          }else if(struct_found && reg_found){
+              structsreglist=InsertStructReg(structsreglist,(char *)$1,reglenght);
+              
+          }else if (reg_found){
 	      if(writelenght){
 	       writelenght=0;
   	       if(reglenght==0)
@@ -563,8 +632,7 @@ WORD
 	      regslist = InsertReg (regslist, regname, regname2);
 	      free (regname);
 	      free (regname2);
-	    }
-	  else if(integer_found){
+	  }else if(integer_found){
 	      regname =	(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
 	      regname2 = (char *) malloc (sizeof (char) * (strlen ((char *) $1) + strlen (processname)) + 1);
 	      strcpy (regname, (char *) $1);
@@ -580,43 +648,33 @@ WORD
 	      free (regname);
 	      free (regname2);
      
-	  }else
-	    {
-	      if (newline)
-		{
-		  for (i = 0; i < openedkeys; i++)
-		    fprintf (file, "   ");
-		}
+	  }else{
+              
+	      if (newline){
+                for (i = 0; i < openedkeys; i++)
+                  fprintf (file, "   ");
+              }
+	     
 	      regname2 = IsReg (regslist, (char *) $1);
-	      if (regname2 == NULL)
-		{
-
-		  if (IsDefine (defineslist, (char *) $1))
-		    {
-		      if (ifdeffound == 0)
-			{
-			  fprintf (file, "`%s", (char *) $1);
-			  defineinvocationfound = 1;
-			}
-		      else
-			{
-			  fprintf (file, "%s", (char *) $1);
-			  ifdeffound = 0;
-			}
-		    }
-		  else
-		    {
-		      fprintf (file, "%s ", (char *) $1);
-		    }
-		}
-	      else
+	      if (regname2 == NULL){
+                if (IsDefine (defineslist, (char *) $1)){
+		   if (ifdeffound == 0){
+                      fprintf (file, "`%s", (char *) $1);
+                      defineinvocationfound = 1;
+                   }else{
+                      fprintf (file, "%s", (char *) $1);
+                      ifdeffound = 0;
+                   }
+                }else{
+	           fprintf (file, "%s ", (char *) $1);
+	        }
+             }else
 		fprintf (file, "%s", regname2);
 
-	      newline = 0;
-	    }
+             newline = 0;
+	  }
 
-	}
-      else if (definefound)
+        }else if (definefound)
 	{
 
 	  if (IsDefine (defineslist, (char *) $1))
@@ -751,7 +809,7 @@ SEMICOLON
   defineparenthesis = 0;
   if (translate == 1 && verilog == 0)
     {
-      if (processfound)
+      if (processfound && !struct_found && !ignore_semicolon)
 	{
 	  if (reg_found)
 	    {
@@ -774,6 +832,7 @@ SEMICOLON
   
   writingvar=0;
   defineinvocationfound = 0;
+  ignore_semicolon=0;
 };
 
 
@@ -913,37 +972,33 @@ closekey:
 CLOSEKEY
 {
   defineparenthesis = 0;
-  if (translate == 1 && verilog == 0)
-    {
-      if (processfound && !definefound)
-	{
-	  if (openedkeys == switchparenthesis[switchfound] && switchfound > 0)
-	    {
+  if(struct_found){
+    end_struct=1;
+  }else if (translate == 1 && verilog == 0){
+      if (processfound && !definefound){
+	  if (openedkeys == switchparenthesis[switchfound] && switchfound > 0){
 	      fprintf (file, "\n");
-	      if (default_found & !default_break_found)
-		{
+	      if (default_found & !default_break_found){
 		  for (i = 0; i < openedkeys - 1; i++)
 		    fprintf (file, "   ");
 		  fprintf (file, "end\n");
 		  default_found = 0;
-		}
+              }
 	      for (i = 0; i < openedkeys - 1; i++)
-		fprintf (file, "   ");
-	      fprintf (file, "endcase\n");
-	      newline = 1;
-	      switchparenthesis[switchfound] = 0;
-	      switchfound--;
+                fprintf (file, "   ");
 
-	    }
-	  else
-	    {
+              fprintf (file, "endcase\n");
+              newline = 1;
+              switchparenthesis[switchfound] = 0;
+              switchfound--;
+          }else{
 	      fprintf (file, "\n");
 	      for (i = 0; i < openedkeys; i++)
 		fprintf (file, "   ");
 	      fprintf (file, "end\n");
 	      newline = 1;
-	    }
-	}
+	  }
+      }
 
       openedkeys--;
       if (definefound)
@@ -959,6 +1014,8 @@ CLOSEKEY
 	  fclose (file);
 	  fclose (regs_file);
 	  processfound = 0;
+          /*Clear process struct list*/
+          structslist=NULL;
 	}
     }
   else if (verilog == 1)
@@ -1409,3 +1466,10 @@ if(processfound){
   fprintf (file, " %s", (char *)$1);
  }
 }
+
+struct_dec:
+STRUCT OPENKEY
+{
+  struct_found=1;
+}
+

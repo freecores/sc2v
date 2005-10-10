@@ -36,10 +36,28 @@ typedef struct _RegNode
   struct _RegNode *next;
 } RegNode;
 
+/*Each struct has a name and a list of the registers declared inside it*/
+typedef struct _StructRegNode
+{
+  char name[MAX_NAME_LENGTH];
+  int length;
+  struct _StructRegNode *next;
+} StructRegNode;
+
+typedef struct _StructNode
+{
+  char name[MAX_NAME_LENGTH];
+  StructRegNode *list;  
+  struct _StructNode *next;
+} StructNode;
+
 /* Global var to store Regs */
   RegNode *regslist;
 /* Global var to store Defines */
   DefineNode *defineslist;
+/*Global var to store Structs */
+  StructNode *structslist;
+  StructRegNode *structsreglist;
 
 /* Functions for defines list*/
 DefineNode *InsertDefine(DefineNode *list,char *name);
@@ -48,5 +66,11 @@ int IsDefine(DefineNode *list,char *name);
 /* Functions for registers list*/
 RegNode *InsertReg(RegNode *list, char *name, char *name2);
 char *IsReg (RegNode *list,char *name);
+
+/* Functions for structs list*/
+StructNode *InsertStruct(StructNode *list, char *name, StructRegNode *reglist);
+StructRegNode *InsertStructReg(StructRegNode *list, char *name, int length);
+void ShowStructs (StructNode * list);
+           
 
 

@@ -15,6 +15,15 @@ void
 fsm::fsm_proc ()
 {
 
+  struct {
+     sc_uint<16> addr;
+     sc_uint<32> data;
+  } st;
+
+  struct {
+     sc_int<26> data1;
+  } st1;
+  
   sc_uint <2> c[4];
   sc_uint <4> f;
   next_state.write (state.read ());
@@ -29,6 +38,7 @@ fsm::fsm_proc ()
 	{
 	  next_state.write (sc_uint<4>(0x1b1));
 	  a.write (true);
+	  st1.data1=8;
 	}
       else if (input2.read () < input1.read())
 	{
@@ -75,7 +85,13 @@ fsm::fsm_proc ()
 }
 
 void fsm::dummy_proc(){
-
-w.write(sc_uint<1>(2));
+  struct {
+     sc_int<26> data1;
+     sc_uint<32> data2;
+  } st2;
+  
+  st2.data1=6;
+  st2.data2=8;
+  w.write(sc_uint<1>(2));
 
 }

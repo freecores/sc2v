@@ -1,3 +1,9 @@
+10-10-2005   Version 0.5
+
+             Added support for structures as local variables
+	     View dummy2.cpp file for an example
+
+
 19-09-2005   Version 0.4.6
 
              Fix bug when closing method with };

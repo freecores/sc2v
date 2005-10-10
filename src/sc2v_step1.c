@@ -74,3 +74,43 @@ IsReg (RegNode *list, char *name)
   );
   return NULL;
 }
+
+StructNode *InsertStruct(StructNode *list, char *name, StructRegNode *reglist){
+    
+	StructNode *sl;
+   
+	sl=(StructNode *)malloc(sizeof(StructNode));  
+	strcpy(sl->name,name);
+	sl->list=reglist;
+	SGLIB_LIST_ADD(StructNode,list,sl,next);
+	return(list);
+    
+}
+
+StructRegNode *InsertStructReg(StructRegNode *list, char *name, int length){
+    
+	StructRegNode *sl;
+   
+	sl=(StructRegNode *)malloc(sizeof(StructRegNode));  
+	strcpy(sl->name,name);
+	sl->length=length;
+	SGLIB_LIST_ADD(StructRegNode,list,sl,next);
+	return(list);
+    
+}
+
+void
+ShowStructs (StructNode * list)
+{
+  StructNode *sll;
+  SGLIB_LIST_MAP_ON_ELEMENTS (StructNode, list, sll, next,
+  {
+	printf ("%s\n", sll->name);
+	StructRegNode *srll;
+	SGLIB_LIST_MAP_ON_ELEMENTS (StructRegNode,sll->list, srll,next,
+	{
+	  printf ("\t%s %d\n",srll->name,srll->length);
+    );}
+  );
+  }
+}
