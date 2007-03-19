@@ -43,7 +43,7 @@ int multilinecomment = 0;
                          }	
 SC_MODULE               if(!includefound & !linecomment & !multilinecomment) return SC_MODULE;
 SC_METHOD               if(!includefound & !linecomment & !multilinecomment) return SC_METHOD;
-SC_CTOR	                if(!includefound & !linecomment & !multilinecomment) return SC_CTOR;
+SC_CTOR	               if(!includefound & !linecomment & !multilinecomment) return SC_CTOR;
 "void"                  if(!includefound & !linecomment & !multilinecomment) return VOID;
 sensitive_pos           if(!includefound & !linecomment & !multilinecomment) return SENSITIVE_POS;
 sensitive_neg           if(!includefound & !linecomment & !multilinecomment) return SENSITIVE_NEG;
@@ -55,9 +55,9 @@ sc_signal               if(!includefound & !linecomment & !multilinecomment) ret
 "bool"                  if(!includefound & !linecomment & !multilinecomment) return BOOL;
 "<"                     if(!includefound & !linecomment & !multilinecomment) return MENOR;
 ">"                     if(!includefound & !linecomment & !multilinecomment) return MAYOR;
-sc_int                  if(!includefound & !linecomment & !multilinecomment) return SC_REG;
-sc_uint	                if(!includefound & !linecomment & !multilinecomment) return SC_REG;
-sc_bigint               if(!includefound & !linecomment & !multilinecomment) return SC_REG;
+sc_int                  if(!includefound & !linecomment & !multilinecomment) return SC_SGNREG;
+sc_uint	               if(!includefound & !linecomment & !multilinecomment) return SC_REG;
+sc_bigint               if(!includefound & !linecomment & !multilinecomment) return SC_SGNREG;
 sc_biguint              if(!includefound & !linecomment & !multilinecomment) return SC_REG;
 \(                      if(!includefound & !linecomment & !multilinecomment) return OPENPAR;
 \)                      if(!includefound & !linecomment & !multilinecomment) return CLOSEPAR;

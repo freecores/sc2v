@@ -35,6 +35,7 @@ typedef struct _port_node
   char tipo[MAX_NAME_LENGTH];
   int size;
   struct _port_node *next;
+  int pflag;
 } PortNode;
 
 typedef struct _signal_node
@@ -43,6 +44,7 @@ typedef struct _signal_node
   int size;
   int arraysize;
   struct _signal_node *next;
+  int sflag;
 } SignalNode;
 
 typedef struct _bind_node
@@ -65,6 +67,7 @@ typedef struct _funcinput_node
   int lenght;
   char name[MAX_NAME_LENGTH];
   struct _funcinput_node *next;
+  int sgnflag;
 } FunctionInputNode;
 
 
@@ -74,6 +77,7 @@ typedef struct _function_node
   int outputlenght;
   FunctionInputNode *list;
   struct _function_node *next;
+  int sgnflag;
 } FunctionNode;
 
 typedef struct _sensibility_node
@@ -138,12 +142,12 @@ int IsWrite (WriteNode *list,char *name);
 WriteNode *ReadWritesFile (WriteNode *list,char *name);
 
 /* Functions for ports list*/
-PortNode *InsertPort (PortNode *list,char *name, char *tipo, int size);
+PortNode *InsertPort (PortNode *list,char *name, char *tipo, int size, int pflag);
 void ShowPortList (PortNode *list);
 void EnumeratePorts (PortNode *list);
 
 /* Functions for signals list*/
-SignalNode *InsertSignal (SignalNode *list,char *name, int size,int arraysize);
+SignalNode *InsertSignal (SignalNode *list,char *name, int size,int arraysize,int sflag);
 void ShowSignalsList (SignalNode* list, WriteNode* writeslist);
 int IsWire (char *name, InstanceNode * list);
 
@@ -172,9 +176,9 @@ int findEnumList (EnumListNode * list, char *name);
 int findEnumerateLength (EnumListNode * list, int offset);
 
 /* Functions for functions inputs list*/
-FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght);
+FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght, int flag);
 void ShowFunctionInputs (FunctionInputNode * list);
 
 /* Functions for functions list*/
-FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght);
+FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght,int flag);
 void ShowFunctionCode (FunctionNode *list);

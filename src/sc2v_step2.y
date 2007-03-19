@@ -47,10 +47,12 @@
   char *lastportkind;
   int lastportsize;
   int activeport = 0;		// 1 -> reading port list
+  int portsign ;
 
 /* Global var to store last signal type*/
   int lastsignalsize;
   int signalactive = 0;
+  int signalsign ;
 
 
 /* Global var to store last SC_METHOD found*/
@@ -66,6 +68,7 @@
 /* Global var to store last function found*/
   char *functionname;
   int outputlenght = 0;
+  int fsgnflag = 0;
 
   int translate;
 
@@ -97,7 +100,7 @@
 
     translate = 1;
 
-    fprintf (stderr, "\nSystemC to Verilog Translator v0.4\n\n");
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.6\n\n");
     fprintf (stderr, "Parsing header file.......\n\n");
 
     FILE *yyin = stdin;
@@ -139,8 +142,8 @@
 
 %}
 
-%token NUMBER SC_MODULE WORD OPENPAR CLOSEPAR SC_IN SC_OUT SEMICOLON BOOL ENUM 
-%token MENOR MAYOR SC_REG SC_METHOD SENSITIVE_POS SENSITIVE_NEG SENSITIVE 
+%token NUMBER SC_MODULE WORD OPENPAR CLOSEPAR SC_IN SC_OUT BOOL ENUM 
+%token MENOR MAYOR SC_REG SC_SGNREG SC_METHOD SENSITIVE_POS SENSITIVE_NEG SENSITIVE 
 %token SENSIBLE CLOSEKEY OPENKEY SEMICOLON COLON SC_SIGNAL ARROW EQUALS NEW QUOTE 
 %token SC_CTOR VOID ASTERISCO TRANSLATEON TRANSLATEOFF OPENCORCH CLOSECORCH
 
@@ -154,9 +157,13 @@ module
   |
   in_sc_reg
   |
+  in_sc_reg_sgn
+  |
   out_bool
   |
   out_sc_reg
+  |
+   out_sc_reg_sgn
   |
   sc_method
   |
@@ -189,6 +196,8 @@ module
   signal_bool
   |
   signal_reg
+  |
+  signal_reg_sgn
   |
   instantation
   |
@@ -229,6 +238,12 @@ module
   functioninputs
   |
   finishfunctioninputs
+  | 
+  function_sgn
+  |
+  functioninputs_sgn
+  |
+  finishfunctioninputs_sgn
   | 
   boolfunction 
   | 
@@ -273,6 +288,19 @@ SC_IN MENOR SC_REG MENOR NUMBER MAYOR MAYOR
       activeport = 1;
       lastportsize = $5;
       lastportkind = (char *) "input";
+      portsign = 0;
+    }
+};
+
+in_sc_reg_sgn:
+SC_IN MENOR SC_SGNREG MENOR NUMBER MAYOR MAYOR
+{
+  if (translate == 1)
+    {
+      activeport = 1;
+      lastportsize = $5;
+      lastportkind = (char *) "input";
+      portsign = 1;
     }
 };
 
@@ -285,6 +313,7 @@ SC_IN MENOR BOOL MAYOR
       activeport = 1;
       lastportsize = 0;
       lastportkind = (char *) "input";
+      portsign = 0;
     }
 };
 
@@ -307,6 +336,18 @@ SC_SIGNAL MENOR SC_REG MENOR NUMBER MAYOR MAYOR
     {
       signalactive = 1;
       lastsignalsize = $5;
+      signalsign = 0;
+    }
+};
+
+signal_reg_sgn:
+SC_SIGNAL MENOR SC_SGNREG MENOR NUMBER MAYOR MAYOR
+{
+  if (translate == 1)
+    {
+      signalactive = 1;
+      lastsignalsize = $5;
+      signalsign = 1;
     }
 };
 
@@ -318,6 +359,7 @@ SC_OUT MENOR BOOL MAYOR
       activeport = 1;
       lastportsize = 0;
       lastportkind = (char *) "output";
+      portsign = 0;
     }
 };
 
@@ -329,6 +371,20 @@ SC_OUT MENOR SC_REG MENOR NUMBER MAYOR MAYOR
       activeport = 1;
       lastportsize = $5;
       lastportkind = (char *) "output";
+      portsign = 0;
+    }
+
+};
+
+out_sc_reg_sgn:
+SC_OUT MENOR SC_SGNREG MENOR NUMBER MAYOR MAYOR
+{
+  if (translate == 1)
+    {
+      activeport = 1;
+      lastportsize = $5;
+      lastportkind = (char *) "output";
+      portsign = 1;
     }
 
 };
@@ -478,7 +534,7 @@ WORD OPENCORCH NUMBER CLOSECORCH SEMICOLON
 {
 if (signalactive)
 	{
-	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3, signalsign);
 	  signalactive = 0;
 	}
 }
@@ -488,7 +544,7 @@ WORD OPENCORCH NUMBER CLOSECORCH COLON
 {
 if (signalactive)
 	{
-	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,$3,signalsign);
 	  signalactive = 0;
 	}
 }
@@ -501,12 +557,12 @@ WORD SEMICOLON
       if (activeport)
 	{
 	  portlist =
-	    InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
+	    InsertPort (portlist, (char *) $1, lastportkind, lastportsize,portsign);
 	  activeport = 0;
 	}
       else if (signalactive)
 	{
-	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,0);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize,0,signalsign);
 	  signalactive = 0;
 	}
       else if (multipledec)
@@ -521,7 +577,7 @@ WORD SEMICOLON
 	    {
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0);
+	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0,0);
 	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      free (storedtype);
 	      multipledec = 0;
@@ -546,11 +602,11 @@ WORD COLON
     {
       if (activeport)
 	{
-	  portlist = InsertPort (portlist, (char *) $1, lastportkind, lastportsize);
+	  portlist = InsertPort (portlist, (char *) $1, lastportkind, lastportsize, portsign);
 	}
       else if (signalactive)
 	{
-	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize, 0);
+	  signalslist = InsertSignal (signalslist, (char *) $1, lastsignalsize, 0,signalsign);
 	}
       else if (reading_enumerates)
 	{
@@ -570,7 +626,7 @@ WORD COLON
 	    {
 	      //Calculate the number of bits needed to represent the enumerate
 	      length = findEnumerateLength (enumlistlist, list_pos);
-	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0);
+	      signalslist = InsertSignal (signalslist, (char *) $1, length, 0, 0);
 	      writeslist = InsertWrite (writeslist, (char *) $1);
 	      multipledec = 1;
 	    }
@@ -788,7 +844,7 @@ WORD WORD SEMICOLON
 	{
 	  //Calculate the number of bits needed to represent the enumerate
 	  length = findEnumerateLength (enumlistlist, list_pos);
-	  signalslist = InsertSignal (signalslist, (char *) $2, length, 0);
+	  signalslist = InsertSignal (signalslist, (char *) $2, length, 0,0);
 	  writeslist = InsertWrite (writeslist, (char *) $2);
 	}
       else
@@ -825,7 +881,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD SEMICOLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 
 
-	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0);
+	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0,signalsign);
 
 	  writeslist = InsertWrite (writeslist, (char *) $5);
 
@@ -872,7 +928,7 @@ WORD WORD COLON
 
 	  strcpy (storedtype, (char *) $1);
 
-	  signalslist = InsertSignal (signalslist, (char *) $2, length,0);
+	  signalslist = InsertSignal (signalslist, (char *) $2, length,0,0);
 
 	  writeslist = InsertWrite (writeslist, (char *) $2);
 
@@ -910,7 +966,7 @@ SC_SIGNAL MENOR WORD MAYOR WORD COLON
 	  length = findEnumerateLength (enumlistlist, list_pos);
 	  storedtype = (char *) malloc (sizeof (char) * strlen ((char *) $3));
 	  strcpy (storedtype, (char *) $3);
-	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0);
+	  signalslist = InsertSignal (signalslist, (char *) $5, length, 0,0);
 	  writeslist = InsertWrite (writeslist, (char *) $5);
 	  multipledec = 1;
 	}
@@ -949,21 +1005,49 @@ SC_REG MENOR NUMBER MAYOR WORD OPENPAR
   functionname = (char *) $5;
   outputlenght = $3;
   funcinputslist = NULL;
+  fsgnflag = 0;
+};
+
+function_sgn:
+SC_SGNREG MENOR NUMBER MAYOR WORD OPENPAR
+{
+  fprintf (stderr, "line: %d Found {signed} Function Declaration \n", lineno);
+  /* New inputs list */
+  functionname = (char *) $5;
+  outputlenght = $3;
+  funcinputslist = NULL;
+  fsgnflag = 1;
+  
 };
 
 functioninputs:
 SC_REG MENOR NUMBER MAYOR WORD COLON
 {
-  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3);
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3,0);
+};
+
+functioninputs_sgn:
+SC_SGNREG MENOR NUMBER MAYOR WORD COLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3,1);
 };
 
 finishfunctioninputs:
 SC_REG MENOR NUMBER MAYOR WORD CLOSEPAR SEMICOLON
 {
-  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3);
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3,0);
   functionslist =
     InsertFunction (functionslist, functionname, funcinputslist,
-		    outputlenght);
+		    outputlenght,fsgnflag);
+};
+
+finishfunctioninputs_sgn:
+SC_SGNREG MENOR NUMBER MAYOR WORD CLOSEPAR SEMICOLON
+{
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $5, $3, 1);
+  functionslist =
+    InsertFunction (functionslist, functionname, funcinputslist,
+		    outputlenght, fsgnflag);
 };
 
 boolfunction:
@@ -979,14 +1063,14 @@ BOOL WORD OPENPAR
 boolfunctioninputs:
 BOOL WORD COLON
 {
-  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2, 1);
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2,1,0);
 };
 
 boolfinishfunctioninputs:
 BOOL WORD CLOSEPAR SEMICOLON
 {
-  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2, 1);
+  funcinputslist = InsertFunctionInput (funcinputslist, (char *) $2,1,0);
   functionslist =
     InsertFunction (functionslist, functionname, funcinputslist,
-		    outputlenght);
+		    outputlenght,0);
 };

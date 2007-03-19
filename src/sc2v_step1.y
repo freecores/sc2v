@@ -38,6 +38,7 @@
   int openedkeys = 0;
   int newline = 0;
   int reg_found = 0;
+  int sigreg_found = 0;
   int reglenght = 0;
   int writelenght = 0;
   int array_size=0;
@@ -91,9 +92,9 @@
     structslist = NULL;
     structsreglist = NULL;
 
-    fprintf (stderr, "\nSystemC to Verilog Translator v0.4");
+    fprintf (stderr, "\nSystemC to Verilog Translator v0.6");
     fprintf (stderr,
-	     "\nProvided by URJC(Universidad Rey Juan Carlos)\nhttp://www.escet.urjc.es/~jmartine\n\n");
+	     "\nProvided by URJC(Universidad Rey Juan Carlos)\nhttp://gdhwsw.escet.urjc.es\n\n");
     fprintf (stderr, "Parsing implementation file.......\n\n");
 
     processname = (char *) malloc (256 * sizeof (char));
@@ -129,7 +130,7 @@
 
 %}
 
-%token NUMBER WORD SC_REG BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE WORD SYMBOL NEWLINE ENUM INCLUDE 
+%token NUMBER WORD SC_REG SC_SIGREG BOOL BIGGER LOWER OPENKEY CLOSEKEY WRITE SYMBOL NEWLINE ENUM INCLUDE 
 %token COLON SEMICOLON RANGE OPENPAR CLOSEPAR TWODOUBLEPOINTS OPENCORCH CLOSECORCH SWITCH CASE DEFAULT BREAK
 %token HEXA DEFINE READ TRANSLATEOFF TRANSLATEON VERILOGBEGIN VERILOGEND TAB DOLLAR MINEQ
 %token VOID TTRUE TFALSE ENDFUNC INC DEC INTEGER EQUALS
@@ -154,6 +155,8 @@ command:
   read
   |
   sc_reg
+  |
+  sc_sigreg
   |
   integer
   |
@@ -255,25 +258,27 @@ command:
 struct_access:
 WORD DOT WORD
 {
+
 /*Struct access
  Check if it is a var acess or a reg*/
  if (newline){
    for (i = 0; i < openedkeys; i++)
       fprintf (file, "   ");
  }
+
  strcpy(structname,(char *)$3);
  strcat(structname,(char *)$1);   	     
  regname2 = IsReg (regslist, structname);
- if (regname2 == NULL)
-  fprintf (file, "%s ", structname);
- else
-  fprintf (file, "%s", regname2);
 
+ if (regname2 == NULL){
+  fprintf (file, "%s ", structname);
+ }else{
+  fprintf (file, "%s", regname2);
+}
   newline = 0;
 
- free(regname2);	  
-
- printf("Access to struct %s.%s\n",(char *)$1,(char *)$3);
+ 
+ /*printf("Access to struct %s.%s\n",(char *)$1,(char *)$3);*/
 }
 
 minorequal:
@@ -452,6 +457,21 @@ SC_REG LOWER NUMBER BIGGER
     }
 };
 
+sc_sigreg:
+SC_SIGREG LOWER NUMBER BIGGER
+{
+  defineparenthesis = 0;
+  if (translate == 1 && verilog == 0)
+    {
+      if (processfound)
+	{
+	  writelenght=1;
+	  reglenght = $3;
+	  sigreg_found = 1;
+	}
+    }
+};
+
 integer:
 INTEGER
 {
@@ -510,7 +530,7 @@ NUMBER
   if (translate == 1 && verilog == 0)
     {
       if (processfound)
-       if(opencorchfound && reg_found)
+       if(opencorchfound && (reg_found || sigreg_found))
         fprintf (regs_file, "%d:0",$1-1);
        else
 	fprintf (file, "%d", $1);
@@ -608,20 +628,27 @@ WORD
 	       free (regname2);
                structsreglist=NULL;
 	       reg_found=0; /*To avoid arrays in sructs the interpretation finish here*/
+          sigreg_found = 0;
              );}
 
-          }else if(struct_found && reg_found){
+          }else if(struct_found && (reg_found || sigreg_found)){
               structsreglist=InsertStructReg(structsreglist,(char *)$1,reglenght);
               
-          }else if (reg_found){
+          }else if (reg_found || sigreg_found){
 	      if(writelenght){
 	       writelenght=0;
   	       if(reglenght==0)
- 	        fprintf (regs_file, "reg ");
+            if(sigreg_found) 
+ 	            fprintf (regs_file, "reg signed");
+            else
+               fprintf (regs_file, "reg ");
 	       else
-   	        fprintf (regs_file, "reg[%d:0] ", (-1 +reglenght));
-	      }
-	        	
+            if(sigreg_found)
+               fprintf (regs_file, "reg signed [%d:0] ", (-1 +reglenght));
+            else
+   	        fprintf (regs_file, "reg [%d:0] ", (-1 +reglenght));
+	      } 
+         
 	      regname =	(char *) malloc (sizeof (char) * (strlen ((char *) $1) + 1));
 	      regname2 = (char *) malloc (sizeof (char) * (strlen ((char *) $1) + strlen (processname)) + 1);
 	      strcpy (regname, (char *) $1);
@@ -701,7 +728,7 @@ SYMBOL
     {
       if (processfound)
 	{
-	  if (reg_found)
+	  if (reg_found || sigreg_found)
 	    fprintf (regs_file, "%s", (char *) $1);
 	  else
 	    fprintf (file, "%s", (char *) $1);
@@ -720,6 +747,7 @@ EQUALS
 {
   defineparenthesis = 0;
   reg_found=0;
+  sigreg_found=0;
   if (translate == 1 && verilog == 0)
   {
    if (processfound)
@@ -764,7 +792,7 @@ NEWLINE
   writingvar=0;
   if (translate == 1 && verilog == 0)
     {
-      if (processfound & !reg_found & !openedcase)
+      if (processfound & !reg_found & !openedcase & !sigreg_found)
 	{
 	  fprintf (file, "\n");
 	  newline = 1;
@@ -787,7 +815,7 @@ COLON
     {
       if (processfound)
 	{
-	  if (reg_found)
+	  if (reg_found || sigreg_found)
 	    {
 	      fprintf (regs_file, ",");
 	    }
@@ -811,10 +839,11 @@ SEMICOLON
     {
       if (processfound && !struct_found && !ignore_semicolon)
 	{
-	  if (reg_found)
+	  if (reg_found || sigreg_found)
 	    {
 	      fprintf (regs_file, ";\n");
 	      reg_found = 0;
+         sigreg_found = 0;
 	    }
 	  else
 	    {
@@ -858,6 +887,7 @@ OPENPAR
     }
   //If par after a sc_reg declaration the declaration is a type cast  
   reg_found=0;
+  sigreg_found=0;
 }
 
 closepar:
@@ -894,7 +924,7 @@ OPENCORCH
       if (processfound)
 	{
 	  opencorchfound = 1;
-	  if (reg_found)
+	  if (reg_found || sigreg_found)
 	    {
 	      fprintf (regs_file, "[");
 	    }
@@ -920,7 +950,7 @@ CLOSECORCH
       if (processfound)
 	  { 
 	  opencorchfound = 0;
-	  if (reg_found)
+	  if (reg_found || sigreg_found)
 	    {
 	      fprintf (regs_file, "]");
 	    }

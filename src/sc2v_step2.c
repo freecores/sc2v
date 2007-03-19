@@ -103,13 +103,14 @@ ReadWritesFile (WriteNode *list,char *name)
 }
 
 PortNode *
-InsertPort (PortNode * list, char *name, char *tipo, int size)
+InsertPort (PortNode * list, char *name, char *tipo, int size, int pflag)
 {
   PortNode *pl;
   pl = (PortNode *) malloc (sizeof (PortNode));
   strcpy (pl->name, name);
   strcpy (pl->tipo, tipo);
   pl->size = size;
+  pl->pflag = pflag;
   SGLIB_LIST_ADD (PortNode, list, pl, next);
   return (list);
 }
@@ -123,10 +124,11 @@ ShowPortList (PortNode * list)
   SGLIB_LIST_MAP_ON_ELEMENTS (PortNode, list, pll, next,
   {
 	printf ("%s ", pll->tipo);
+	if (pll->pflag == 1) printf("signed ");
 	if (pll->size != 0 && pll->size != 1)
 	{
 	  printf ("[%d:0] ", (-1 + pll->size));}
-	  printf ("%s;\n", pll->name);
+	printf ("%s;\n", pll->name);
 	}
   );
   return;
@@ -142,7 +144,7 @@ RegOutputs (PortNode * list, InstanceNode *instances)
 	if (strcmp (pll->tipo, "output") == 0)
 	{
 	 if(!IsWire(pll->name,instances)){
-	  printf ("reg ");
+	   if (pll->pflag == 1) printf("reg signed "); else printf ("reg ");
 	  if (pll->size != 0 && pll->size != 1)
 	  {
 	    printf ("[%d:0] ", (-1 + pll->size));}
@@ -173,7 +175,7 @@ EnumeratePorts (PortNode *list)
 }
 
 SignalNode *
-InsertSignal (SignalNode * list, char *name, int size, int arraysize)
+InsertSignal (SignalNode * list, char *name, int size, int arraysize,int sflag)
 {
   SignalNode *sl;
 
@@ -181,6 +183,7 @@ InsertSignal (SignalNode * list, char *name, int size, int arraysize)
   strcpy (sl->name, name);
   sl->size = size;
   sl->arraysize=arraysize;
+  sl->sflag=sflag;
   SGLIB_LIST_ADD (SignalNode, list, sl, next);
   return (list);
 
@@ -195,7 +198,7 @@ ShowSignalsList (SignalNode * list, WriteNode * writeslist)
   {
 	if (IsWrite (writeslist, sll->name))
 	{
-	  printf ("reg ");
+	  if (sll->sflag==1) printf("reg signed "); else printf ("reg ");
 	  if (sll->size != 0 && sll->size != 1)
 	  {
 	    printf ("[%d:0] ", (-1 + sll->size));
@@ -204,7 +207,7 @@ ShowSignalsList (SignalNode * list, WriteNode * writeslist)
 	}
 	else
 	{
-	  printf ("wire ");
+	  if (sll->sflag==1) printf("wire signed "); else printf ("wire ");
 	  if (sll->size != 0 && sll->size != 1)
 	  {
 		printf ("[%d:0] ", (-1 + sll->size));
@@ -575,11 +578,12 @@ findEnumerateLength (EnumListNode * list, int offset)
  }
 
  /* Functions for functions inputs list*/
-FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght){
+FunctionInputNode *InsertFunctionInput (FunctionInputNode * list, char *name, int lenght, int flag){
   FunctionInputNode *fl;
   fl = (FunctionInputNode *) malloc (sizeof (FunctionInputNode));
   strcpy (fl->name, name);
   fl->lenght=lenght;
+  fl->sgnflag=flag;
   SGLIB_LIST_ADD (FunctionInputNode, list, fl, next);
   return (list);
 }
@@ -592,20 +596,29 @@ void ShowFunctionInputs (FunctionInputNode * list){
   
   SGLIB_LIST_MAP_ON_ELEMENTS (FunctionInputNode,list, fll,next,
   {
+    if(fll->sgnflag==0)
+    {
     if(fll->lenght!=1)
      printf("input [%d:0] %s;\n",(fll->lenght)-1,fll->name); 
     else
      printf("input %s;\n",fll->name); 
+     } else {
+     if(fll->lenght!=1)
+     printf("input signed [%d:0] %s;\n",(fll->lenght)-1,fll->name); 
+    else
+     printf("input signed %s;\n",fll->name);
+     }
   });
 }
 
 /* Functions for functions list*/
-FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght){
+FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght,int flag){
   FunctionNode *fl;
   fl = (FunctionNode *) malloc (sizeof (FunctionNode));
   strcpy (fl->name, name);
   fl->outputlenght=outputlenght;
   fl->list = InputsList;
+  fl->sgnflag=flag;
   SGLIB_LIST_ADD (FunctionNode, list, fl, next);
   return (list);
 }
@@ -622,11 +635,19 @@ void ShowFunctionCode (FunctionNode *list){
     	
   SGLIB_LIST_MAP_ON_ELEMENTS (FunctionNode,list, fll,next,
   {
+   if(fll->sgnflag==0)
+   {
 	if(fll->outputlenght!=1)
      printf("function [%d:0] %s;\n\n",(fll->outputlenght)-1,fll->name); 
     else
 	 printf("function %s;\n\n",fll->name); 
-	
+	} else {
+   if(fll->outputlenght!=1)
+     printf("function signed [%d:0] %s;\n\n",(fll->outputlenght)-1,fll->name); 
+    else
+	 printf("function signed %s;\n\n",fll->name);    
+   }
+   
 	ShowFunctionInputs(fll->list);
 	
 	//Show Registers
