@@ -18,7 +18,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+#ifndef SC2V_STEP_2_H
+#define SC2V_STEP_2_H
 #include "sglib.h"
  
 #define MAX_NAME_LENGTH 256
@@ -111,25 +112,16 @@ typedef struct _enumlist_node
 } EnumListNode;
 
 
-/*Global var to read from file_writes.sc2v*/
-  WriteNode *writeslist;
-/*Global var to store ports*/
-  PortNode *portlist;
-/* Global var to store signals*/
-  SignalNode *signalslist;
-/* Global var to store sensitivity list*/
-  SensibilityNode *sensibilitylist;
-/* Global var to store process list*/
-  ProcessNode *processlist;
-/* Global var to store instantiated modules*/
-  InstanceNode *instanceslist;
-/*List of enumerates*/
-  EnumeratesNode *enumerateslist;
-  EnumListNode *enumlistlist;
-/* Global var to store functions inputs list*/
-  FunctionInputNode *funcinputslist;
-/* Global var to store process list*/
-  FunctionNode *functionslist;
+  extern WriteNode *writeslist;
+  extern PortNode *portlist;
+  extern SignalNode *signalslist;
+  extern SensibilityNode *sensibilitylist;
+  extern ProcessNode *processlist;
+  extern InstanceNode *instanceslist;
+  extern EnumeratesNode *enumerateslist;
+  extern EnumListNode *enumlistlist;
+  extern FunctionInputNode *funcinputslist;
+  extern FunctionNode *functionslist;
 
 
 
@@ -182,3 +174,5 @@ void ShowFunctionInputs (FunctionInputNode * list);
 /* Functions for functions list*/
 FunctionNode *InsertFunction (FunctionNode *list, char *name,FunctionInputNode *InputsList,int outputlenght,int flag);
 void ShowFunctionCode (FunctionNode *list);
+
+#endif
