@@ -18,7 +18,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+#ifndef SC2V_STEP_1_H
+#define SC2V_STEP_1_H
 #include "sglib.h"
 
 #define MAX_NAME_LENGTH 256
@@ -51,13 +52,10 @@ typedef struct _StructNode
   struct _StructNode *next;
 } StructNode;
 
-/* Global var to store Regs */
-  RegNode *regslist;
-/* Global var to store Defines */
-  DefineNode *defineslist;
-/*Global var to store Structs */
-  StructNode *structslist;
-  StructRegNode *structsreglist;
+  extern  RegNode *regslist;
+  extern  DefineNode *defineslist;
+  extern  StructNode *structslist;
+  extern  StructRegNode *structsreglist;
 
 /* Functions for defines list*/
 DefineNode *InsertDefine(DefineNode *list,char *name);
@@ -74,3 +72,4 @@ void ShowStructs (StructNode * list);
            
 
 
+#endif
