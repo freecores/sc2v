@@ -26,15 +26,15 @@ YACC = bison -y
 all:
 	$(LEX) sc2v_step1.l
 	$(YACC) -d sc2v_step1.y
-	gcc lex.yy.c y.tab.c sc2v_step1.c -Isrc -o ../bin/sc2v_step1 -lm
+	gcc -m32 lex.yy.c y.tab.c sc2v_step1.c global_vars.cpp -Isrc -o ../bin/sc2v_step1 -lm
 
 	$(LEX) sc2v_step2.l
 	$(YACC) -d sc2v_step2.y 
-	gcc lex.yy.c y.tab.c sc2v_step2.c -Isrc -o ../bin/sc2v_step2 -lm
+	gcc -m32 lex.yy.c y.tab.c sc2v_step2.c global_vars.cpp -Isrc -o ../bin/sc2v_step2 -lm
 
 	$(LEX) sc2v_step3.l
 	$(YACC) -d sc2v_step3.y
-	gcc lex.yy.c y.tab.c -Isrc -o ../bin/sc2v_step3 -lm
+	gcc -m32 lex.yy.c y.tab.c global_vars.cpp -Isrc -o ../bin/sc2v_step3 -lm
 
 clean:
 	rm -rf lex.* y.* *.o ../bin/sc2v_step2* ../bin/sc2v_step1* ../bin/sc2v_step3*
